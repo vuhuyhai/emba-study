@@ -749,30 +749,85 @@ const styles = `
 
 // ─── QUIZ DATA ────────────────────────────────────────────────────────────────
 
+
+// ─── LOCALSTORAGE HELPERS ─────────────────────────────────────────────────────
+const STORAGE_KEY = "emba_study_pro_v1";
+function loadData() {
+  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; }
+  catch { return null; }
+}
+function saveData(d) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch {}
+}
+function getDefaultData() {
+  return {
+    totalStudied: 0, totalInterview: 0, bestQuizScore: 0,
+    studiedTerms: {}, quizHistory: [], interviewHistory: [],
+    firstSeen: new Date().toISOString(), lastSeen: new Date().toISOString(),
+  };
+}
+
 export default function EMBAStudyTool() {
-  const [screen, setScreen] = useState("home"); // home | topics | study | interview | quiz
+  const [screen, setScreen] = useState("home");
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [cardIndex, setCardIndex] = useState(0);
   const [showDef, setShowDef] = useState(false);
-  const [scores, setScores] = useState({ flashcard: 0, quiz: 0, interview: 0, studied: 0 });
-  
-  // Quiz state
+  const [showStats, setShowStats] = useState(false);
+
+  const [userData, setUserData] = useState(() => loadData() || getDefaultData());
+
   const [quizIndex, setQuizIndex] = useState(0);
   const [quizSelected, setQuizSelected] = useState(null);
   const [quizCorrect, setQuizCorrect] = useState(0);
   const [quizDone, setQuizDone] = useState(false);
   const [shuffledQuiz] = useState(() => [...QUIZ_QUESTIONS].sort(() => Math.random() - 0.5));
-  
-  // Interview state
+
   const [interviewIndex, setInterviewIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState(null);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
-  const [interviewTopic, setInterviewTopic] = useState(null); // null = general
-  const [interviewMode, setInterviewMode] = useState("general"); // general | knowledge
+  const [interviewTopic, setInterviewTopic] = useState(null);
+  const [interviewMode, setInterviewMode] = useState("general");
 
   const topicCards = selectedTopic ? TOPICS.find(t => t.id === selectedTopic) : null;
   const currentCard = topicCards ? topicCards.keyTerms[cardIndex] : null;
+
+  const updateUserData = (updater) => {
+    setUserData(prev => {
+      const next = updater({ ...prev });
+      next.lastSeen = new Date().toISOString();
+      saveData(next);
+      return next;
+    });
+  };
+
+  const getTopicProgress = (topicId) => {
+    const topic = TOPICS.find(t => t.id === topicId);
+    if (!topic) return { studied: 0, total: 0, pct: 0 };
+    const total = topic.keyTerms.length;
+    const studied = topic.keyTerms.filter((_, i) => userData.studiedTerms[`${topicId}_${i}`]).length;
+    return { studied, total, pct: total > 0 ? Math.round((studied / total) * 100) : 0 };
+  };
+
+  const isTermStudied = (topicId, idx) => !!userData.studiedTerms[`${topicId}_${idx}`];
+
+  const formatDate = (iso) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+  };
+
+  const getDaysStudied = () => {
+    const dates = new Set([
+      ...(userData.quizHistory || []).map(h => h.date?.slice(0, 10)),
+      ...(userData.interviewHistory || []).map(h => h.date?.slice(0, 10)),
+    ].filter(Boolean));
+    return dates.size;
+  };
+
+  const totalTerms = TOPICS.reduce((sum, t) => sum + t.keyTerms.length, 0);
+  const totalStudiedTerms = Object.keys(userData.studiedTerms || {}).length;
+
 
   const callClaude = async (systemPrompt, userMsg) => {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -793,32 +848,23 @@ export default function EMBAStudyTool() {
     if (!answer.trim()) return;
     setLoadingFeedback(true);
     setFeedback(null);
-    
     const questionText = interviewMode === "general"
       ? INTERVIEW_QUESTIONS[interviewIndex]
       : (topicCards?.sampleQA?.[interviewIndex % (topicCards?.sampleQA?.length || 1)]?.q || INTERVIEW_QUESTIONS[0]);
-
-    const system = `Bạn là giảng viên chuyên gia của chương trình EMBA tại Đại học Ngoại thương Việt Nam. 
-Nhiệm vụ: Đánh giá câu trả lời phỏng vấn đầu vào của ứng viên EMBA một cách chuyên nghiệp, chi tiết và mang tính xây dựng.
-
-Cấu trúc phản hồi (trả lời bằng tiếng Việt):
-1. **Điểm mạnh** (✅): 2-3 điểm tốt trong câu trả lời
-2. **Điểm cần cải thiện** (⚠️): 2-3 điểm còn yếu hoặc thiếu
-3. **Gợi ý cụ thể**: Câu trả lời mẫu hoặc hướng dẫn cụ thể để nâng điểm
-4. **Đánh giá tổng thể**: Điểm số từ 1-10 và nhận xét ngắn gọn
-
-Yêu cầu: Phản hồi thực tế, không chung chung, tập trung vào nội dung chất lượng và kỹ năng trình bày.`;
-
-    const userMsg = `Câu hỏi phỏng vấn EMBA: "${questionText}"
-
-Câu trả lời của ứng viên: "${answer}"
-
-Hãy đánh giá chi tiết câu trả lời này.`;
-
+    const system = `Bạn là giảng viên chuyên gia của chương trình EMBA tại Đại học Ngoại thương Việt Nam. Nhiệm vụ: Đánh giá câu trả lời phỏng vấn đầu vào của ứng viên EMBA một cách chuyên nghiệp, chi tiết và mang tính xây dựng.\n\nCấu trúc phản hồi (trả lời bằng tiếng Việt):\n1. **Điểm mạnh** (✅): 2-3 điểm tốt\n2. **Điểm cần cải thiện** (⚠️): 2-3 điểm còn yếu\n3. **Gợi ý cụ thể**: Câu trả lời mẫu để nâng điểm\n4. **Đánh giá tổng thể**: Điểm 1-10 và nhận xét ngắn`;
+    const userMsg = `Câu hỏi: "${questionText}"\nCâu trả lời: "${answer}"\nĐánh giá chi tiết.`;
     try {
       const result = await callClaude(system, userMsg);
       setFeedback(result);
-      setScores(s => ({ ...s, interview: s.interview + 1 }));
+      // Lưu vào lịch sử
+      updateUserData(prev => ({
+        ...prev,
+        totalInterview: (prev.totalInterview || 0) + 1,
+        interviewHistory: [
+          { date: new Date().toISOString(), question: questionText, answer, mode: interviewMode, topicId: interviewTopic },
+          ...(prev.interviewHistory || []).slice(0, 49), // giữ tối đa 50 lần
+        ],
+      }));
     } catch {
       setFeedback("❌ Lỗi kết nối. Vui lòng thử lại.");
     }
@@ -828,22 +874,28 @@ Hãy đánh giá chi tiết câu trả lời này.`;
   const nextInterviewQ = () => {
     const maxQ = interviewMode === "general" ? INTERVIEW_QUESTIONS.length : (topicCards?.sampleQA?.length || 1);
     setInterviewIndex(i => (i + 1) % maxQ);
-    setAnswer("");
-    setFeedback(null);
+    setAnswer(""); setFeedback(null);
   };
 
   const handleQuizAnswer = (idx) => {
     if (quizSelected !== null) return;
     setQuizSelected(idx);
-    if (idx === shuffledQuiz[quizIndex].correct) {
-      setQuizCorrect(c => c + 1);
-    }
+    if (idx === shuffledQuiz[quizIndex].correct) setQuizCorrect(c => c + 1);
   };
 
   const nextQuizQ = () => {
+    const lastCorrect = quizSelected === shuffledQuiz[quizIndex].correct ? 1 : 0;
     if (quizIndex + 1 >= shuffledQuiz.length) {
+      const finalScore = quizCorrect + lastCorrect;
       setQuizDone(true);
-      setScores(s => ({ ...s, quiz: quizCorrect + (quizSelected === shuffledQuiz[quizIndex].correct ? 1 : 0) }));
+      updateUserData(prev => ({
+        ...prev,
+        bestQuizScore: Math.max(prev.bestQuizScore || 0, finalScore),
+        quizHistory: [
+          { date: new Date().toISOString(), score: finalScore, total: shuffledQuiz.length, pct: Math.round((finalScore / shuffledQuiz.length) * 100) },
+          ...(prev.quizHistory || []).slice(0, 19),
+        ],
+      }));
     } else {
       setQuizIndex(q => q + 1);
       setQuizSelected(null);
@@ -855,13 +907,18 @@ Hãy đánh giá chi tiết câu trả lời này.`;
   };
 
   const markStudied = () => {
-    setScores(s => ({ ...s, flashcard: s.flashcard + 1, studied: s.studied + 1 }));
+    const termKey = `${selectedTopic}_${cardIndex}`;
+    updateUserData(prev => {
+      const alreadyStudied = prev.studiedTerms?.[termKey];
+      return {
+        ...prev,
+        totalStudied: alreadyStudied ? prev.totalStudied : (prev.totalStudied || 0) + 1,
+        studiedTerms: { ...prev.studiedTerms, [termKey]: true },
+      };
+    });
     setShowDef(false);
-    if (cardIndex + 1 < topicCards.keyTerms.length) {
-      setCardIndex(i => i + 1);
-    } else {
-      setCardIndex(0);
-    }
+    if (cardIndex + 1 < topicCards.keyTerms.length) setCardIndex(i => i + 1);
+    else setCardIndex(0);
   };
 
   const interviewQuestion = interviewMode === "general"
@@ -892,6 +949,7 @@ Hãy đánh giá chi tiết câu trả lời này.`;
       </div>
 
       {/* HOME */}
+      {/* HOME */}
       {screen === "home" && (
         <div className="home">
           <div className="home-hero">
@@ -901,16 +959,11 @@ Hãy đánh giá chi tiết câu trả lời này.`;
 
           <div className="mode-cards">
             {[
-              { icon: "🃏", title: "Flashcard Thuật ngữ", desc: "Ôn tập nhanh các khái niệm và định nghĩa trọng tâm từng chủ đề. Lý tưởng cho việc ghi nhớ.", tag: "8 chủ đề · 80+ thuật ngữ", screen: "topics", accent: "#c9a84c" },
-              { icon: "🤖", title: "Phỏng vấn AI", desc: "Claude AI đóng vai Hội đồng tuyển sinh, hỏi và chấm điểm câu trả lời của bạn theo chuẩn EMBA.", tag: "AI-powered · Phản hồi chi tiết", screen: "interview", accent: "#3498db" },
-              { icon: "📝", title: "Trắc nghiệm Kiến thức", desc: "20 câu trắc nghiệm bám sát nội dung Robbins & Coulter. Câu hỏi xáo ngẫu nhiên mỗi lần thi.", tag: "20 câu · Có giải thích", screen: "quiz", accent: "#e91e8c" },
+              { icon: "🃏", title: "Flashcard Thuật ngữ", desc: "Ôn tập nhanh các khái niệm và định nghĩa trọng tâm từng chủ đề. Lý tưởng cho việc ghi nhớ.", tag: "8 chủ đề · 100+ thuật ngữ", screen: "topics" },
+              { icon: "🤖", title: "Phỏng vấn AI", desc: "Claude AI đóng vai Hội đồng tuyển sinh, hỏi và chấm điểm câu trả lời của bạn theo chuẩn EMBA.", tag: "AI-powered · Phản hồi chi tiết", screen: "interview" },
+              { icon: "📝", title: "Trắc nghiệm Kiến thức", desc: "20 câu trắc nghiệm bám sát nội dung Robbins & Coulter. Câu hỏi xáo ngẫu nhiên mỗi lần thi.", tag: "20 câu · Có giải thích", screen: "quiz" },
             ].map(m => (
-              <div
-                key={m.screen}
-                className="mode-card"
-                style={{ "--accent-color": m.accent }}
-                onClick={() => setScreen(m.screen)}
-              >
+              <div key={m.screen} className="mode-card" onClick={() => setScreen(m.screen)}>
                 <div className="mode-icon">{m.icon}</div>
                 <div className="mode-title">{m.title}</div>
                 <div className="mode-desc">{m.desc}</div>
@@ -919,21 +972,96 @@ Hãy đánh giá chi tiết câu trả lời này.`;
             ))}
           </div>
 
-          <div className="score-banner">
-            {[
-              { val: scores.studied, label: "Thuật ngữ đã học" },
-              { val: scores.interview, label: "Câu phỏng vấn đã luyện" },
-              { val: scores.quiz, label: "Câu trắc nghiệm đúng" },
-              { val: TOPICS.length, label: "Chủ đề trong đề cương" },
-            ].map(s => (
-              <div key={s.label} className="score-item">
-                <div className="score-val">{s.val}</div>
-                <div className="score-label">{s.label}</div>
+          {/* TIẾN ĐỘ HỌC TẬP */}
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 24px", marginBottom: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontWeight: 600, fontSize: 14, color: "var(--text)" }}>📊 Tiến độ học tập</div>
+              <button
+                onClick={() => setShowStats(!showStats)}
+                style={{ fontSize: 12, color: "var(--accent)", background: "var(--accent-light)", border: "1px solid #bfdbfe", padding: "4px 12px", borderRadius: 99, cursor: "pointer", fontFamily: "Roboto" }}
+              >
+                {showStats ? "Ẩn chi tiết" : "Xem chi tiết"}
+              </button>
+            </div>
+
+            <div className="score-banner" style={{ marginBottom: showStats ? 16 : 0 }}>
+              {[
+                { val: totalStudiedTerms, label: "Thuật ngữ đã thuộc", sub: `/ ${totalTerms}` },
+                { val: userData.totalInterview || 0, label: "Câu PV đã luyện", sub: "" },
+                { val: userData.bestQuizScore || 0, label: "Điểm TN cao nhất", sub: `/ ${QUIZ_QUESTIONS.length}` },
+                { val: getDaysStudied(), label: "Ngày đã học", sub: "" },
+              ].map(s => (
+                <div key={s.label} className="score-item">
+                  <div className="score-val">{s.val}<span style={{ fontSize: 13, color: "var(--muted)", fontWeight: 400 }}>{s.sub}</span></div>
+                  <div className="score-label">{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Progress bar tổng */}
+            <div style={{ marginTop: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--muted)", marginBottom: 5 }}>
+                <span>Flashcard toàn bộ</span>
+                <span style={{ color: "var(--accent)", fontWeight: 600 }}>{Math.round((totalStudiedTerms / totalTerms) * 100)}%</span>
               </div>
-            ))}
+              <div style={{ height: 6, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${(totalStudiedTerms / totalTerms) * 100}%`, background: "var(--accent)", borderRadius: 99, transition: "width .4s" }} />
+              </div>
+            </div>
+
+            {/* Chi tiết theo chủ đề */}
+            {showStats && (
+              <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 10, fontWeight: 500 }}>TIẾN ĐỘ THEO CHỦ ĐỀ</div>
+                {TOPICS.map(t => {
+                  const p = getTopicProgress(t.id);
+                  return (
+                    <div key={t.id} style={{ marginBottom: 8 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 3 }}>
+                        <span>{t.icon} {t.title.split(". ").slice(1).join(". ") || t.title}</span>
+                        <span style={{ color: p.pct === 100 ? "var(--green)" : "var(--muted)" }}>{p.studied}/{p.total}</span>
+                      </div>
+                      <div style={{ height: 4, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${p.pct}%`, background: p.pct === 100 ? "var(--green)" : "var(--accent)", borderRadius: 99, transition: "width .4s" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Lịch sử làm quiz */}
+                {userData.quizHistory?.length > 0 && (
+                  <div style={{ marginTop: 16, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
+                    <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 10, fontWeight: 500 }}>LỊCH SỬ THI TRẮC NGHIỆM</div>
+                    {userData.quizHistory.slice(0, 5).map((h, i) => (
+                      <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "5px 0", borderBottom: "1px solid var(--border)" }}>
+                        <span style={{ color: "var(--muted)" }}>{formatDate(h.date)}</span>
+                        <span style={{ fontWeight: 600, color: h.pct >= 80 ? "var(--green)" : h.pct >= 60 ? "var(--amber)" : "var(--red)" }}>
+                          {h.score}/{h.total} — {h.pct}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Nút reset */}
+                <button
+                  onClick={() => { if (window.confirm("Xóa toàn bộ dữ liệu học tập?")) { saveData(getDefaultData()); setUserData(getDefaultData()); } }}
+                  style={{ marginTop: 14, fontSize: 11, color: "var(--red)", background: "var(--red-light)", border: "1px solid #fecaca", padding: "5px 12px", borderRadius: 8, cursor: "pointer", fontFamily: "Roboto" }}
+                >
+                  🗑 Xóa dữ liệu & bắt đầu lại
+                </button>
+              </div>
+            )}
           </div>
+
+          {userData.lastSeen && (
+            <div style={{ textAlign: "center", fontSize: 11, color: "var(--muted)", marginBottom: 8 }}>
+              Học lần cuối: {formatDate(userData.lastSeen)} · Bắt đầu từ: {formatDate(userData.firstSeen)}
+            </div>
+          )}
         </div>
       )}
+
 
       {/* TOPIC SELECT */}
       {screen === "topics" && (
@@ -973,29 +1101,23 @@ Hãy đánh giá chi tiết câu trả lời này.`;
           <div className="study-header">
             <div className="topic-badge" style={{ borderColor: "#bfdbfe" }}>
               <span>{topicCards.icon}</span>
-              <span style={{ color: "var(--accent)" }}>{topicCards.title}</span>
+          {/* PROGRESS BAR với số đã học trong chủ đề */}
+          <div style={{ display: "flex", gap: 10, marginBottom: 6, alignItems: "center" }}>
+            <div className="progress-bar" style={{ flex: 1 }}>
+              <div className="progress-fill" style={{ width: `${((cardIndex + 1) / topicCards.keyTerms.length) * 100}%`, background: "var(--accent)" }} />
             </div>
+            <span style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, whiteSpace: "nowrap" }}>
+              ✓ {getTopicProgress(selectedTopic).studied}/{topicCards.keyTerms.length} đã thuộc
+            </span>
           </div>
+        </div>
 
-          <div className="progress-wrap">
-            <div className="progress-label">
-              <span>Thuật ngữ {cardIndex + 1}/{topicCards.keyTerms.length}</span>
-              <span style={{ color: "var(--accent)" }}>{topicCards.chapters}</span>
-            </div>
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${((cardIndex + 1) / topicCards.keyTerms.length) * 100}%`,
-                  background: "var(--accent)"
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="flashcard" onClick={() => setShowDef(!showDef)}>
-            <div className="flashcard-hint">
-              💡 {showDef ? "Click để ẩn định nghĩa" : "Click để xem định nghĩa"}
+          <div className="flashcard" onClick={() => setShowDef(!showDef)}
+            style={{ borderColor: isTermStudied(selectedTopic, cardIndex) ? "#86efac" : "var(--border)", background: isTermStudied(selectedTopic, cardIndex) ? "#f8fffb" : "var(--surface)" }}
+          >
+            <div className="flashcard-hint" style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>💡 {showDef ? "Click để ẩn định nghĩa" : "Click để xem định nghĩa"}</span>
+              {isTermStudied(selectedTopic, cardIndex) && <span style={{ color: "var(--green)", fontSize: 11, fontWeight: 600 }}>✓ Đã thuộc</span>}
             </div>
             <div className="flashcard-term">{currentCard?.term}</div>
             {showDef && <div className="flashcard-def">{currentCard?.def}</div>}
@@ -1009,9 +1131,10 @@ Hãy đánh giá chi tiết câu trả lời này.`;
               {showDef ? "Ẩn định nghĩa" : "Xem định nghĩa"}
             </button>
             <button className="btn btn-success" onClick={markStudied}>
-              Đã thuộc ✓
+              {isTermStudied(selectedTopic, cardIndex) ? "✓ Đã thuộc" : "Đánh dấu đã thuộc"}
             </button>
           </div>
+
 
           <div className="divider" />
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
@@ -9,32 +9,41 @@ const TOPICS = [
     title: "I. Tổng quan về Quản trị",
     color: "#1a6b4a",
     accent: "#2ecc71",
-    chapters: "Ch.1 + Management History Module",
+    chapters: "Ch.1 — Managers and You in the Workplace",
     subtopics: [
-      "Khái niệm tổ chức và đặc trưng cơ bản",
-      "Khái niệm quản trị & nhà quản trị",
-      "4 chức năng quản trị (POLC)",
-      "3 cấp quản trị (cơ sở, trung, cao)",
-      "3 kỹ năng quản trị (chuyên môn, nhân sự, tư duy)",
-      "Vai trò của nhà quản trị (Mintzberg)",
+      "Khái niệm tổ chức và 3 đặc trưng cơ bản",
+      "Khái niệm quản trị (Management) & nhà quản trị",
+      "Hiệu lực (Effectiveness) vs Hiệu quả (Efficiency)",
+      "4 chức năng quản trị: POLC",
+      "3 cấp quản trị: First-line, Middle, Top",
+      "3 kỹ năng: Chuyên môn, Nhân sự, Tư duy khái quát",
+      "10 vai trò của nhà quản trị (Mintzberg)",
     ],
     keyTerms: [
-      { term: "Quản trị (Management)", def: "Quá trình hoạch định, tổ chức, lãnh đạo và kiểm soát nguồn lực để đạt mục tiêu tổ chức một cách hiệu lực và hiệu quả." },
-      { term: "Hiệu lực (Effectiveness)", def: "Làm đúng việc — hoàn thành các mục tiêu đã đặt ra. 'Doing the right things.'" },
-      { term: "Hiệu quả (Efficiency)", def: "Làm việc đúng cách — sử dụng tối ưu nguồn lực để đạt kết quả. 'Doing things right.'" },
-      { term: "Kỹ năng tư duy khái quát", def: "Khả năng nhìn nhận tổ chức như một hệ thống tổng thể, hiểu mối quan hệ giữa các bộ phận. Quan trọng nhất ở cấp quản trị cao." },
-      { term: "Vai trò quan hệ con người", def: "Gồm: người đại diện (figurehead), nhà lãnh đạo (leader), trung tâm liên lạc (liaison)." },
-      { term: "Vai trò thông tin", def: "Gồm: giám sát/thu thập thông tin (monitor), phổ biến thông tin (disseminator), người phát ngôn (spokesperson)." },
-      { term: "Vai trò ra quyết định", def: "Gồm: người khởi xướng (entrepreneur), xử lý xáo trộn (disturbance handler), phân bổ nguồn lực (resource allocator), người thương lượng (negotiator)." },
+      { term: "Quản trị (Management)", def: "Quá trình phối hợp và giám sát hoạt động của người khác để các hoạt động đó được thực hiện một cách hiệu quả (efficiently) và hiệu lực (effectively) nhằm đạt mục tiêu tổ chức." },
+      { term: "Hiệu lực (Effectiveness)", def: "'Doing the right things' — Làm đúng việc, hoàn thành mục tiêu tổ chức. Liên quan đến KẾT QUẢ (ends). VD: Southwest Airlines đạt mục tiêu phục vụ khách hàng tốt nhất." },
+      { term: "Hiệu quả (Efficiency)", def: "'Doing things right' — Làm việc đúng cách, tối thiểu hóa lãng phí nguồn lực (người, tiền, thiết bị). Liên quan đến PHƯƠNG TIỆN (means). VD: Southwest dùng 1 loại máy bay để giảm chi phí đào tạo." },
+      { term: "Tổ chức (Organization)", def: "Một tập hợp có chủ đích của con người để thực hiện một mục đích cụ thể. 3 đặc trưng: (1) Mục đích rõ ràng, (2) Có con người, (3) Có cơ cấu tổ chức." },
+      { term: "Nhà quản trị (Manager)", def: "Người phối hợp và giám sát công việc của người khác để mục tiêu tổ chức được thực hiện. Khác với nhân viên bình thường ở chỗ: họ làm việc THÔNG QUA người khác, không chỉ làm cá nhân." },
+      { term: "Quản trị viên cấp cơ sở (First-line)", def: "Cấp quản trị thấp nhất, quản lý nhân viên không giữ chức vụ quản lý. Chức danh: Supervisor, Shift Manager, Trưởng ca. Kỹ năng quan trọng nhất: CHUYÊN MÔN." },
+      { term: "Quản trị viên cấp trung (Middle)", def: "Cấp giữa, chịu trách nhiệm biến chiến lược thành hành động. Chức danh: Regional Manager, Store Manager, Division Manager. Cần CÂN BẰNG cả 3 kỹ năng." },
+      { term: "Quản trị viên cấp cao (Top)", def: "Cấp cao nhất, ra quyết định toàn tổ chức và thiết lập chiến lược. Chức danh: CEO, CFO, President. Kỹ năng quan trọng nhất: TƯ DUY KHÁI QUÁT." },
+      { term: "Kỹ năng chuyên môn (Technical)", def: "Kiến thức và năng lực trong lĩnh vực chuyên biệt. VD: kỹ năng kế toán, lập trình, marketing. Quan trọng nhất ở cấp quản trị cơ sở." },
+      { term: "Kỹ năng nhân sự (Human)", def: "Khả năng làm việc tốt với người khác — cả cá nhân lẫn nhóm. Gồm: giao tiếp, tạo động lực, giải quyết xung đột. Quan trọng ở MỌI cấp quản trị." },
+      { term: "Kỹ năng tư duy khái quát (Conceptual)", def: "Khả năng nhìn nhận tổ chức như một hệ thống tổng thể, hiểu mối quan hệ giữa các bộ phận và với môi trường. Quan trọng nhất ở cấp quản trị CAO." },
+      { term: "4 Chức năng POLC", def: "Planning (Hoạch định): xác định mục tiêu & cách đạt. Organizing (Tổ chức): sắp xếp công việc. Leading (Lãnh đạo): hướng dẫn & động viên. Controlling (Kiểm soát): giám sát kết quả." },
+      { term: "Vai trò quan hệ con người (Interpersonal)", def: "3 vai trò: (1) Người đại diện/Figurehead: đại diện tổ chức trong nghi lễ. (2) Nhà lãnh đạo/Leader: tuyển dụng, đào tạo, động viên. (3) Trung tâm liên lạc/Liaison: duy trì quan hệ bên ngoài." },
+      { term: "Vai trò thông tin (Informational)", def: "3 vai trò: (1) Monitor: thu thập thông tin từ môi trường. (2) Disseminator: phổ biến thông tin nội bộ. (3) Spokesperson: phát ngôn với bên ngoài." },
+      { term: "Vai trò ra quyết định (Decisional)", def: "4 vai trò: (1) Entrepreneur: khởi xướng thay đổi. (2) Disturbance Handler: xử lý khủng hoảng. (3) Resource Allocator: phân bổ nguồn lực. (4) Negotiator: thương lượng." },
     ],
     sampleQA: [
       {
-        q: "Quản trị là gì? Phân biệt hiệu lực và hiệu quả. Cho ví dụ tại tổ chức bạn.",
-        hints: ["Định nghĩa quản trị theo Robbins: POLC", "Effectiveness = doing the right things", "Efficiency = doing things right", "Ví dụ thực tế từ công ty bạn"]
+        q: "Quản trị là gì? Phân biệt hiệu lực và hiệu quả. Cho ví dụ thực tế tại tổ chức bạn.",
+        hints: ["Định nghĩa: phối hợp & giám sát → đạt mục tiêu efficiently & effectively", "Effectiveness = doing the right things (đúng mục tiêu)", "Efficiency = doing things right (ít lãng phí)", "Ví dụ cụ thể từ tổ chức bạn làm"]
       },
       {
-        q: "Trình bày 3 cấp quản trị và kỹ năng cần thiết ở mỗi cấp.",
-        hints: ["Cấp cơ sở: kỹ năng chuyên môn quan trọng nhất", "Cấp trung: cân bằng 3 kỹ năng", "Cấp cao: kỹ năng tư duy khái quát quan trọng nhất"]
+        q: "Trình bày 3 cấp quản trị và kỹ năng cần thiết ở mỗi cấp. Liên hệ thực tế.",
+        hints: ["Cấp cơ sở: kỹ năng chuyên môn cao nhất", "Cấp trung: cân bằng 3 kỹ năng", "Cấp cao: tư duy khái quát quan trọng nhất", "Liên hệ vị trí của bạn trong tổ chức"]
       }
     ]
   },
@@ -46,29 +55,35 @@ const TOPICS = [
     accent: "#3498db",
     chapters: "Management History Module",
     subtopics: [
-      "Taylor - Quản trị khoa học (4 nguyên tắc)",
-      "Fayol - Quản trị hành chính (14 nguyên tắc)",
-      "Quản trị hành vi: Hawthorne + Thuyết X&Y",
-      "Quản trị định lượng",
-      "Quản trị theo quá trình",
-      "Tiếp cận hệ thống",
+      "Taylor — Quản trị Khoa học (4 nguyên tắc)",
+      "Fayol — Quản trị Hành chính (14 nguyên tắc)",
+      "Hawthorne Studies & Hiệu ứng Hawthorne",
+      "McGregor — Thuyết X và Thuyết Y",
+      "Quản trị Định lượng",
+      "Tiếp cận Hệ thống & Tiếp cận Tình huống",
     ],
     keyTerms: [
-      { term: "Scientific Management (Taylor)", def: "4 nguyên tắc: (1) Nghiên cứu KH từng yếu tố, (2) Tuyển chọn & đào tạo KH, (3) Hợp tác với công nhân, (4) Phân công công việc bình đẳng giữa quản lý và công nhân." },
-      { term: "14 nguyên tắc Fayol", def: "Bao gồm: phân công LĐ, quyền hạn, kỷ luật, thống nhất chỉ huy, thống nhất phương hướng, lợi ích chung > cá nhân, thù lao, tập trung hóa, chuỗi vô hướng, trật tự, công bằng, ổn định nhân sự, sáng kiến, tinh thần đồng đội." },
-      { term: "Hiệu ứng Hawthorne", def: "Năng suất tăng khi công nhân biết mình đang được quan sát/chú ý, bất kể điều kiện làm việc thay đổi như thế nào." },
-      { term: "Thuyết X (McGregor)", def: "Người lao động không thích làm việc, lười biếng, cần được kiểm soát chặt chẽ và đe dọa để hoàn thành công việc." },
-      { term: "Thuyết Y (McGregor)", def: "Người lao động tự giác, sáng tạo, chấp nhận trách nhiệm, và coi công việc như hoạt động tự nhiên nếu được tạo điều kiện tốt." },
-      { term: "Tiếp cận hệ thống", def: "Tổ chức là hệ thống mở gồm các bộ phận liên kết nhau (input → process → output), tương tác với môi trường bên ngoài." },
+      { term: "Scientific Management (Taylor)", def: "4 nguyên tắc: (1) Nghiên cứu khoa học từng yếu tố công việc thay vì dùng kinh nghiệm. (2) Tuyển chọn & đào tạo NLĐ một cách khoa học. (3) Hợp tác chân thành với NLĐ. (4) Phân chia công việc bình đẳng giữa QTR và công nhân." },
+      { term: "Time-and-Motion Studies (Taylor)", def: "Phương pháp của Taylor: quan sát và đo thời gian từng động tác công việc để tìm 'one best way' — cách làm hiệu quả nhất. Ứng dụng hiện đại: UPS đào tạo tài xế từng động tác cụ thể." },
+      { term: "General Administrative Theory (Fayol)", def: "Fayol đề xuất quản trị là một tập hợp các chức năng phổ quát có thể áp dụng ở mọi tổ chức. Ông xác định 14 nguyên tắc quản trị, 5 chức năng: Plan, Organize, Command, Coordinate, Control." },
+      { term: "14 Nguyên tắc Fayol", def: "(1) Phân công LĐ, (2) Quyền hạn, (3) Kỷ luật, (4) Thống nhất chỉ huy, (5) Thống nhất phương hướng, (6) Lợi ích chung > cá nhân, (7) Thù lao, (8) Tập trung hóa, (9) Chuỗi vô hướng, (10) Trật tự, (11) Công bằng, (12) Ổn định nhân sự, (13) Sáng kiến, (14) Tinh thần đồng đội." },
+      { term: "Nguyên tắc Thống nhất chỉ huy (Unity of Command)", def: "Mỗi nhân viên chỉ nhận lệnh từ MỘT cấp trên duy nhất. Tránh nhầm lẫn và xung đột mệnh lệnh. Đây là một trong 14 nguyên tắc quan trọng nhất của Fayol." },
+      { term: "Behavioral Approach (Quản trị Hành vi)", def: "Nghiên cứu con người là trung tâm — không chỉ nhiệm vụ. Xuất phát từ nghiên cứu Hawthorne (1920s). Kết luận: hành vi con người và nhóm ảnh hưởng quan trọng đến năng suất." },
+      { term: "Hiệu ứng Hawthorne (Hawthorne Effect)", def: "Phát hiện từ nghiên cứu tại nhà máy Western Electric: năng suất tăng khi NLĐ biết mình đang được quan sát/chú ý, BẤT KỂ điều kiện vật chất thay đổi thế nào. Chứng minh yếu tố tâm lý xã hội quan trọng hơn điều kiện vật lý." },
+      { term: "Thuyết X (McGregor)", def: "Quan điểm tiêu cực về NLĐ: họ không thích làm việc, lười biếng, trốn tránh trách nhiệm, cần bị kiểm soát chặt và đe dọa mới làm việc. → QTR cần giám sát chặt, hệ thống quy tắc nghiêm ngặt." },
+      { term: "Thuyết Y (McGregor)", def: "Quan điểm tích cực: NLĐ thích làm việc, tự giác, sáng tạo, sẵn sàng nhận trách nhiệm nếu được tạo điều kiện. → QTR nên trao quyền, tạo môi trường tốt. Quản trị hiện đại nghiêng về Thuyết Y." },
+      { term: "Quantitative Management (Quản trị Định lượng)", def: "Sử dụng kỹ thuật định lượng (thống kê, mô hình toán học, mô phỏng, tối ưu hóa) để ra quyết định quản trị. Ra đời từ WWII. Ứng dụng: lập lịch sản xuất, tối ưu hóa chuỗi cung ứng." },
+      { term: "Systems Approach (Tiếp cận Hệ thống)", def: "Tổ chức là HỆ THỐNG MỞ gồm các bộ phận liên kết (Input → Transformation → Output), tương tác với môi trường bên ngoài. Thay đổi một bộ phận sẽ ảnh hưởng đến toàn hệ thống." },
+      { term: "Contingency Approach (Tiếp cận Tình huống)", def: "Không có một cách quản trị nào là tốt nhất cho mọi tình huống ('it depends'). QTR cần điều chỉnh phương pháp phù hợp với từng bối cảnh cụ thể: quy mô, công nghệ, môi trường, con người." },
     ],
     sampleQA: [
       {
-        q: "Trình bày lý thuyết Quản trị khoa học của Taylor. Ưu nhược điểm?",
-        hints: ["4 nguyên tắc cụ thể", "Ưu: tăng năng suất, tiêu chuẩn hóa", "Nhược: bỏ qua yếu tố tâm lý, xã hội", "Áp dụng tại VN?"]
+        q: "Trình bày lý thuyết Quản trị Khoa học của Taylor. Ưu điểm và nhược điểm?",
+        hints: ["4 nguyên tắc cụ thể + time-and-motion studies", "Ưu: tăng năng suất vượt trội, tiêu chuẩn hóa quy trình", "Nhược: bỏ qua yếu tố tâm lý-xã hội, công nhân như 'máy móc'", "Ứng dụng thực tế tại VN hoặc tổ chức bạn"]
       },
       {
         q: "So sánh Thuyết X và Thuyết Y của McGregor. Ứng dụng trong quản trị nhân sự hiện đại?",
-        hints: ["Thuyết X: con người thụ động, kiểm soát chặt", "Thuyết Y: con người chủ động, trao quyền", "Xu hướng quản trị hiện đại nghiêng về Thuyết Y"]
+        hints: ["Thuyết X: con người thụ động → kiểm soát chặt", "Thuyết Y: con người chủ động → trao quyền", "Xu hướng hiện đại: Thuyết Y (Google, Zappos...)", "Liên hệ phong cách quản lý tại tổ chức bạn"]
       }
     ]
   },
@@ -78,23 +93,28 @@ const TOPICS = [
     title: "III. Môi trường Kinh doanh",
     color: "#6b1a4a",
     accent: "#e91e8c",
-    chapters: "Ch.3 External Environment & Culture",
+    chapters: "Ch.3 — External Environment & Organizational Culture",
     subtopics: [
-      "Môi trường bên trong & bên ngoài",
-      "Môi trường tác nghiệp (ngành): KH, NCC, ĐTCT, nhóm áp lực",
-      "Môi trường vĩ mô: PEST (kinh tế, CT-PL, CN, VH-XH, nhân khẩu)",
+      "Cấu trúc môi trường: bên trong & bên ngoài",
+      "Môi trường tác nghiệp: KH, NCC, ĐTCT, Nhóm áp lực",
+      "Môi trường vĩ mô: PESTEL",
       "Mô hình 5 lực lượng cạnh tranh Porter",
+      "Văn hóa tổ chức",
     ],
     keyTerms: [
-      { term: "5 Forces Porter", def: "(1) Đối thủ cạnh tranh hiện tại, (2) Nguy cơ từ đối thủ mới, (3) Quyền thương lượng nhà cung cấp, (4) Quyền thương lượng khách hàng, (5) Nguy cơ từ sản phẩm thay thế." },
-      { term: "Môi trường tác nghiệp", def: "Các yếu tố trực tiếp ảnh hưởng đến hoạt động kinh doanh: khách hàng, nhà cung cấp, đối thủ cạnh tranh, nhóm tạo sức ép (stakeholders)." },
-      { term: "PEST/PESTEL", def: "Môi trường vĩ mô: Political (Chính trị-pháp luật), Economic (Kinh tế), Sociocultural (Văn hóa-xã hội), Technological (Công nghệ). Thêm Environmental và Legal cho PESTEL." },
-      { term: "Môi trường bên trong", def: "Văn hóa tổ chức, nguồn nhân lực, tài chính, công nghệ, cơ cấu tổ chức — các yếu tố doanh nghiệp có thể kiểm soát." },
+      { term: "Môi trường tác nghiệp (Task Environment)", def: "Các yếu tố bên ngoài TÁC ĐỘNG TRỰC TIẾP đến hoạt động hàng ngày của tổ chức: (1) Khách hàng, (2) Nhà cung cấp, (3) Đối thủ cạnh tranh, (4) Nhóm tạo sức ép (pressure groups, labor unions)." },
+      { term: "Môi trường vĩ mô (General Environment)", def: "Các yếu tố bên ngoài tác động GIÁN TIẾP đến tổ chức — PESTEL: Political (Chính trị-pháp luật), Economic (Kinh tế), Sociocultural (Văn hóa-xã hội), Technological (Công nghệ), Environmental (Môi trường tự nhiên), Legal (Pháp lý)." },
+      { term: "Môi trường bên trong (Internal Environment)", def: "Các yếu tố trong NỘI BỘ tổ chức: văn hóa tổ chức, cơ cấu tổ chức, nguồn nhân lực, tài chính, công nghệ. Tổ chức có thể kiểm soát được." },
+      { term: "5 Lực lượng Porter (Five Forces)", def: "(1) Rivalry — mức độ cạnh tranh hiện tại. (2) Threat of New Entrants — nguy cơ đối thủ mới. (3) Bargaining Power of Suppliers — quyền lực NCC. (4) Bargaining Power of Buyers — quyền lực KH. (5) Threat of Substitutes — nguy cơ sản phẩm thay thế." },
+      { term: "Rào cản gia nhập ngành (Entry Barriers)", def: "Các yếu tố ngăn đối thủ mới gia nhập ngành: vốn lớn, công nghệ độc quyền, thương hiệu mạnh, quy mô kinh tế, chính sách pháp luật. Rào cản cao → lợi nhuận ngành tốt hơn." },
+      { term: "Văn hóa tổ chức (Organizational Culture)", def: "Hệ thống các giá trị, niềm tin, và nguyên tắc được chia sẻ giữa các thành viên. Thể hiện qua: cách ứng xử, nghi lễ, biểu tượng, câu chuyện, ngôn ngữ. Ảnh hưởng mạnh đến hành vi nhân viên." },
+      { term: "Văn hóa mạnh vs Văn hóa yếu", def: "Văn hóa mạnh: giá trị cốt lõi được chia sẻ rộng rãi và kiên định → giảm cần thiết của quy tắc chính thức, tăng cam kết nhân viên. Văn hóa yếu: giá trị mơ hồ, không nhất quán → cần nhiều quy định hơn." },
+      { term: "Môi trường không chắc chắn (Environmental Uncertainty)", def: "Mức độ khó dự đoán các thay đổi trong môi trường. Hai chiều: (1) Mức độ thay đổi (ổn định ↔ động). (2) Mức độ phức tạp (đơn giản ↔ phức tạp). Môi trường càng bất định → tổ chức cần linh hoạt hơn." },
     ],
     sampleQA: [
       {
-        q: "Trình bày mô hình 5 lực lượng cạnh tranh của Porter. Áp dụng phân tích ngành của bạn.",
-        hints: ["5 lực lượng rõ ràng", "Mỗi lực lượng: nội dung + yếu tố ảnh hưởng mức độ", "Áp dụng cụ thể vào ngành/công ty bạn đang làm"]
+        q: "Trình bày mô hình 5 lực lượng cạnh tranh của Porter. Áp dụng phân tích ngành của tổ chức bạn.",
+        hints: ["5 lực lượng với tên tiếng Anh và tiếng Việt", "Mỗi lực lượng: các yếu tố quyết định mức độ", "Phân tích cụ thể 1-2 lực lượng mạnh nhất trong ngành của bạn", "Ý nghĩa với chiến lược kinh doanh"]
       }
     ]
   },
@@ -104,29 +124,36 @@ const TOPICS = [
     title: "IV. Chức năng Hoạch định",
     color: "#6b4a1a",
     accent: "#f39c12",
-    chapters: "Ch.8 Foundations of Planning",
+    chapters: "Ch.8 Foundations of Planning + Ch.9 Managing Strategy",
     subtopics: [
-      "Khái niệm, nội dung, tầm quan trọng của hoạch định",
-      "Phân loại kế hoạch (thời gian, mức độ cụ thể, phạm vi)",
-      "Mục tiêu và nguyên tắc SMART",
-      "Thiết lập mục tiêu: truyền thống vs MBO",
-      "Quy trình hoạch định",
+      "Khái niệm, mục đích và tầm quan trọng của hoạch định",
+      "Phân loại kế hoạch: thời gian, phạm vi, mức độ cụ thể, tần suất",
+      "Mục tiêu SMART và phương pháp MBO",
+      "Quy trình hoạch định chiến lược",
+      "Phân tích SWOT",
     ],
     keyTerms: [
-      { term: "Hoạch định (Planning)", def: "Xác định mục tiêu của tổ chức và phương thức tốt nhất để đạt được mục tiêu đó. Là nền tảng của 4 chức năng quản trị." },
-      { term: "Nguyên tắc SMART", def: "Mục tiêu tốt phải: Specific (cụ thể), Measurable (đo lường được), Achievable (khả thi), Relevant (phù hợp), Time-bound (có thời hạn)." },
-      { term: "MBO (Management by Objectives)", def: "Phương pháp thiết lập mục tiêu hợp tác giữa quản lý và nhân viên. Mục tiêu cụ thể → đánh giá định kỳ → khen thưởng dựa trên kết quả." },
-      { term: "Kế hoạch chiến lược vs tác nghiệp", def: "Chiến lược: dài hạn (3-5 năm), toàn tổ chức, định hướng lớn. Tác nghiệp: ngắn hạn (≤1 năm), bộ phận cụ thể, chi tiết thực hiện." },
-      { term: "Kế hoạch định hướng", def: "Kế hoạch linh hoạt, chỉ đưa ra hướng đi chung, phù hợp môi trường không chắc chắn. Trái với kế hoạch cụ thể (specific plan)." },
+      { term: "Hoạch định (Planning)", def: "Xác định mục tiêu của tổ chức, thiết lập chiến lược tổng thể để đạt mục tiêu, và phát triển hệ thống kế hoạch tích hợp để phối hợp hoạt động. Liên quan đến cả ENDS (mục tiêu) và MEANS (phương tiện)." },
+      { term: "4 Lý do hoạch định quan trọng", def: "(1) Cung cấp ĐỊNH HƯỚNG cho mọi người. (2) GiẢM BỚT bất trắc bằng cách nhìn về tương lai. (3) Giảm thiểu LÃNG PHÍ và trùng lặp. (4) Xây dựng TIÊU CHUẨN để kiểm soát." },
+      { term: "Kế hoạch chiến lược (Strategic Plans)", def: "Áp dụng cho TOÀN TỔ CHỨC, thiết lập mục tiêu tổng thể và định vị trong môi trường. Thời gian: 3-5 năm hoặc hơn. Xuất phát từ MISSION (sứ mệnh) của tổ chức." },
+      { term: "Kế hoạch tác nghiệp (Operational Plans)", def: "Xác định CHI TIẾT cách thực hiện mục tiêu chiến lược. Thời gian: ngắn hạn (≤1 năm). Phạm vi: bộ phận cụ thể. Mang tính chi tiết và định lượng cao." },
+      { term: "Kế hoạch cụ thể (Specific Plans)", def: "Kế hoạch với mục tiêu và hành động RÕ RÀNG, không mơ hồ. VD: 'tăng doanh thu 20% trong Q2 bằng cách mở 3 điểm bán mới ở HCM'. Phù hợp khi môi trường ổn định." },
+      { term: "Kế hoạch định hướng (Directional Plans)", def: "Kế hoạch LINH HOẠT, chỉ đưa ra hướng đi chung, không cố định mục tiêu hay hành động cụ thể. VD: 'cải thiện lợi nhuận 5-10% trong 6 tháng'. Phù hợp khi môi trường bất định." },
+      { term: "Kế hoạch một lần (Single-use Plans)", def: "Kế hoạch tạo ra cho một TÌNH HUỐNG DUY NHẤT, không lặp lại. VD: kế hoạch mở nhà máy mới, kế hoạch ra mắt sản phẩm. Sau khi hoàn thành mục tiêu thì kế hoạch kết thúc." },
+      { term: "Kế hoạch thường trực (Standing Plans)", def: "Kế hoạch LIÊN TỤC, cung cấp hướng dẫn cho các hoạt động lặp đi lặp lại. Gồm: Chính sách (policies), Quy trình (procedures), Quy tắc (rules). VD: chính sách không phân biệt đối xử." },
+      { term: "Nguyên tắc SMART", def: "Mục tiêu tốt cần: Specific (Cụ thể), Measurable (Đo lường được), Achievable (Khả thi), Relevant (Phù hợp/Liên quan), Time-bound (Có thời hạn). VD: 'Tăng doanh số bán hàng online lên 30% trước ngày 31/12/2026.'" },
+      { term: "MBO — Management by Objectives", def: "Phương pháp thiết lập mục tiêu HỢP TÁC giữa QTR và NV: (1) Cùng xác định mục tiêu cụ thể. (2) Định kỳ xem xét tiến độ. (3) Khen thưởng dựa trên kết quả đạt được. Tăng động lực và cam kết." },
+      { term: "Phân tích SWOT", def: "Công cụ phân tích chiến lược: Strengths (Điểm mạnh nội bộ), Weaknesses (Điểm yếu nội bộ), Opportunities (Cơ hội từ môi trường), Threats (Thách thức từ môi trường). Giúp xây dựng chiến lược phù hợp." },
+      { term: "Mission (Sứ mệnh)", def: "Tuyên bố rộng về MỤC ĐÍCH của tổ chức — lý do tổ chức tồn tại. Cung cấp định hướng tổng quát cho mọi quyết định. VD: Walmart: 'Save people money so they can live better.'" },
     ],
     sampleQA: [
       {
-        q: "Hoạch định quan trọng như thế nào? Trình bày ví dụ về hoạch định tại tổ chức bạn đang công tác.",
-        hints: ["4 lý do quan trọng: định hướng, giảm bất chắc, phối hợp, kiểm soát", "Ví dụ thực tế: kế hoạch năm, kế hoạch dự án..."]
+        q: "Hoạch định quan trọng như thế nào? Trình bày ví dụ về hoạch định tại tổ chức bạn.",
+        hints: ["4 lý do quan trọng: định hướng, giảm bất trắc, giảm lãng phí, tạo tiêu chuẩn kiểm soát", "Ví dụ thực tế: kế hoạch năm, kế hoạch dự án, kế hoạch chiến lược", "Liên hệ: kế hoạch của bạn/bộ phận bạn"]
       },
       {
-        q: "Nguyên tắc SMART là gì? Đặt 1 mục tiêu SMART cho bộ phận của bạn.",
-        hints: ["Giải thích 5 tiêu chí", "Đặt mục tiêu thực tế từ công việc của bạn"]
+        q: "Phân biệt kế hoạch chiến lược và kế hoạch tác nghiệp. Cho ví dụ.",
+        hints: ["Chiến lược: toàn tổ chức, 3-5 năm, từ sứ mệnh", "Tác nghiệp: bộ phận cụ thể, ngắn hạn, chi tiết", "Ví dụ cụ thể từ thực tế tổ chức bạn"]
       }
     ]
   },
@@ -136,27 +163,38 @@ const TOPICS = [
     title: "V. Chức năng Tổ chức",
     color: "#4a1a6b",
     accent: "#9b59b6",
-    chapters: "Ch.11 Designing Organizational Structure",
+    chapters: "Ch.11 — Designing Organizational Structure",
     subtopics: [
-      "Chuyên môn hóa (specialization)",
-      "Phân khâu (departmentalization)",
-      "Phân định quyền hạn, trách nhiệm",
-      "Phạm vi kiểm soát & phân quyền",
-      "Cơ cấu cơ khí vs hữu cơ",
+      "6 yếu tố thiết kế cơ cấu tổ chức",
+      "Chuyên môn hóa và Phân khâu",
+      "Chuỗi chỉ huy, Quyền hạn, Trách nhiệm",
+      "Phạm vi kiểm soát và Phân quyền",
+      "Cơ cấu Cơ khí vs Hữu cơ",
       "5 mô hình cơ cấu tổ chức",
     ],
     keyTerms: [
-      { term: "Chuyên môn hóa", def: "Chia công việc thành các nhiệm vụ nhỏ, mỗi người chuyên sâu một việc. Tăng năng suất nhưng có thể gây nhàm chán và thiếu linh hoạt." },
-      { term: "Cơ cấu chức năng", def: "Nhóm nhân viên theo chức năng chuyên môn (Marketing, Tài chính, Sản xuất...). Ưu: chuyên môn sâu. Nhược: phối hợp kém, cục bộ." },
-      { term: "Cơ cấu theo sản phẩm/SBU", def: "Nhóm theo sản phẩm, dịch vụ, thị trường, hoặc khách hàng. Ưu: linh hoạt, trách nhiệm rõ. Nhược: trùng lặp nguồn lực." },
-      { term: "Cơ cấu ma trận", def: "Kết hợp chức năng và dự án/sản phẩm. Ưu: linh hoạt, phối hợp tốt. Nhược: xung đột quyền lực, 2 sếp." },
-      { term: "Cơ cấu cơ khí (Mechanistic)", def: "Chính thức hóa cao, tập trung hóa, nhiều quy tắc. Phù hợp môi trường ổn định." },
-      { term: "Cơ cấu hữu cơ (Organic)", def: "Linh hoạt, phi tập trung, ít quy tắc. Phù hợp môi trường biến động và sáng tạo." },
+      { term: "6 Yếu tố thiết kế cơ cấu", def: "(1) Work Specialization — chuyên môn hóa. (2) Departmentalization — phân khâu. (3) Chain of Command — chuỗi chỉ huy. (4) Span of Control — phạm vi kiểm soát. (5) Centralization/Decentralization — tập trung/phân quyền. (6) Formalization — chính thức hóa." },
+      { term: "Chuyên môn hóa (Work Specialization)", def: "Chia công việc thành các nhiệm vụ NHỎ, mỗi người chuyên sâu một việc. Tăng năng suất nhờ: kỹ năng sâu, tiết kiệm thời gian chuyển việc. Nhược: nhàm chán, căng thẳng, tăng vắng mặt nếu quá mức." },
+      { term: "Phân khâu theo chức năng (Functional)", def: "Nhóm nhân viên theo CHỨC NĂNG chuyên môn: Marketing, Tài chính, Sản xuất, Nhân sự. Ưu: chuyên môn sâu, phối hợp nội bộ tốt. Nhược: phối hợp LIÊN BỘ PHẬN kém, tầm nhìn hẹp." },
+      { term: "Phân khâu theo sản phẩm (Product)", def: "Nhóm theo dòng sản phẩm/dịch vụ. VD: P&G có nhóm Fabric Care, Baby Care, Beauty riêng. Ưu: linh hoạt, trách nhiệm rõ với từng sản phẩm. Nhược: trùng lặp chức năng, tốn kém." },
+      { term: "Phân khâu theo địa lý (Geographic)", def: "Nhóm theo vùng địa lý. VD: phòng kinh doanh Miền Bắc, Miền Nam. Ưu: phục vụ nhu cầu địa phương tốt. Nhược: trùng lặp chức năng, khó phối hợp toàn quốc." },
+      { term: "Cơ cấu Ma trận (Matrix)", def: "Kết hợp CHỨC NĂNG và DỰ ÁN/SẢN PHẨM. Nhân viên báo cáo cho CẢ HAI: trưởng bộ phận chức năng VÀ trưởng dự án. Ưu: linh hoạt, phối hợp tốt. Nhược: xung đột quyền lực, mơ hồ chỉ huy." },
+      { term: "Chuỗi chỉ huy (Chain of Command)", def: "Đường quyền hạn từ CẤP CAO xuống cấp thấp nhất, làm rõ ai báo cáo cho ai. Liên quan đến: Authority (Quyền hạn), Responsibility (Trách nhiệm), Unity of Command (Thống nhất chỉ huy)." },
+      { term: "Quyền hạn (Authority)", def: "Quyền của nhà quản trị RA LỆNH và yêu cầu tuân thủ. Line authority: quyền chỉ huy trực tiếp. Staff authority: quyền tư vấn, hỗ trợ. Phân biệt với Power (quyền lực) — rộng hơn." },
+      { term: "Phạm vi kiểm soát (Span of Control)", def: "Số lượng nhân viên mà một QTR có thể quản lý HIỆU QUẢ. Rộng (nhiều NV): tiết kiệm chi phí, linh hoạt. Hẹp (ít NV): kiểm soát tốt hơn, tốn kém. Xu hướng hiện đại: phạm vi kiểm soát rộng hơn." },
+      { term: "Tập trung hóa (Centralization)", def: "Quyết định được tập trung ở CẤP QUẢN TRỊ CAO. Phù hợp khi: cần nhất quán, tổ chức nhỏ, môi trường ổn định, QTR cấp thấp thiếu năng lực." },
+      { term: "Phân quyền (Decentralization)", def: "Quyền quyết định được TRAO XUỐNG cấp thấp hơn. Phù hợp khi: môi trường phức tạp/biến động, cần phản ứng nhanh, NV cấp thấp có năng lực. Xu hướng hiện đại: phân quyền nhiều hơn." },
+      { term: "Cơ cấu Cơ khí (Mechanistic)", def: "Đặc điểm: chính thức hóa CAO, tập trung hóa CAO, phân công rõ ràng, quy trình cứng nhắc. Phù hợp: môi trường ổn định, công việc lặp đi lặp lại. VD: dây chuyền sản xuất hàng loạt." },
+      { term: "Cơ cấu Hữu cơ (Organic)", def: "Đặc điểm: linh hoạt, phi tập trung, ít quy tắc, phạm vi kiểm soát rộng, truyền thông đa chiều. Phù hợp: môi trường biến động, cần sáng tạo. VD: công ty khởi nghiệp công nghệ." },
     ],
     sampleQA: [
       {
         q: "Chuyên môn hóa là gì? Lợi ích và hạn chế? Tổ chức của bạn có áp dụng không?",
-        hints: ["Định nghĩa: phân chia công việc thành nhiệm vụ nhỏ", "Lợi ích: năng suất cao, dễ đào tạo", "Hạn chế: nhàm chán, thiếu linh hoạt, phụ thuộc", "Ví dụ thực tế"]
+        hints: ["Định nghĩa: chia công việc thành nhiệm vụ nhỏ, chuyên biệt", "Lợi ích: năng suất cao, kỹ năng sâu, tiết kiệm thời gian", "Hạn chế: nhàm chán, thiếu linh hoạt, phụ thuộc lẫn nhau", "Ví dụ thực tế từ tổ chức của bạn"]
+      },
+      {
+        q: "So sánh cơ cấu cơ khí và cơ cấu hữu cơ. Khi nào dùng mỗi loại?",
+        hints: ["Cơ khí: chính thức cao, tập trung, ổn định", "Hữu cơ: linh hoạt, phân quyền, sáng tạo", "Yếu tố tình huống quyết định: môi trường, chiến lược, công nghệ, con người"]
       }
     ]
   },
@@ -166,26 +204,36 @@ const TOPICS = [
     title: "VII. Chức năng Lãnh đạo",
     color: "#1a4a6b",
     accent: "#00bcd4",
-    chapters: "Ch.17 Being an Effective Leader",
+    chapters: "Ch.17 — Being an Effective Leader",
     subtopics: [
-      "Phân biệt Lãnh đạo vs Quản trị",
-      "Phẩm chất nhà lãnh đạo",
-      "Phong cách lãnh đạo: độc đoán, dân chủ, tự do",
-      "Lãnh đạo theo định hướng công việc vs nhân viên (ĐH Michigan)",
-      "Lãnh đạo tình huống Hersey & Blanchard",
+      "Phân biệt Lãnh đạo (Leader) vs Quản trị (Manager)",
+      "Các phẩm chất quan trọng của nhà lãnh đạo",
+      "Phong cách lãnh đạo: Độc đoán, Dân chủ, Tự do",
+      "Nghiên cứu Michigan: Định hướng Công việc vs Nhân viên",
+      "Lãnh đạo Tình huống Hersey & Blanchard (4 phong cách)",
+      "Lãnh đạo Chuyển đổi (Transformational Leadership)",
     ],
     keyTerms: [
-      { term: "Lãnh đạo vs Quản trị", def: "Quản trị: làm việc đúng cách (hoạch định, tổ chức, kiểm soát). Lãnh đạo: truyền cảm hứng, ảnh hưởng người khác, tạo ra sự thay đổi." },
-      { term: "Lãnh đạo độc đoán (Autocratic)", def: "Nhà lãnh đạo tự ra quyết định, ít tham khảo cấp dưới. Hiệu quả khi cần quyết định nhanh, tình huống khủng hoảng." },
-      { term: "Lãnh đạo dân chủ (Democratic)", def: "Nhà lãnh đạo tham khảo ý kiến nhóm trước khi quyết định. Tăng cam kết và sự hài lòng của nhân viên." },
-      { term: "Lãnh đạo tự do (Laissez-faire)", def: "Nhà lãnh đạo để nhóm tự quyết định. Hiệu quả với nhóm chuyên gia có năng lực và động lực cao." },
-      { term: "Lãnh đạo tình huống Hersey-Blanchard", def: "4 phong cách: Telling (S1), Selling (S2), Participating (S3), Delegating (S4), phụ thuộc mức độ sẵn sàng của cấp dưới (R1→R4)." },
-      { term: "Mức độ sẵn sàng (Readiness)", def: "R1: thiếu năng lực & động lực → S1 Telling. R2: thiếu năng lực nhưng có động lực → S2 Selling. R3: có năng lực nhưng thiếu động lực → S3 Participating. R4: có cả hai → S4 Delegating." },
+      { term: "Lãnh đạo (Leadership)", def: "Quá trình ảnh hưởng đến một nhóm để đạt mục tiêu. Phân biệt: Quản trị tập trung vào HIỆU QUẢ quy trình (plan-organize-control). Lãnh đạo tập trung vào THAY ĐỔI và TẠO CẢM HỨNG. Nhà lãnh đạo tốt phải CÓ NGƯỜI THEO." },
+      { term: "Phong cách Độc đoán (Autocratic)", def: "Nhà lãnh đạo TỰ RA QUYẾT ĐỊNH, ít hoặc không tham khảo cấp dưới. Hiệu quả khi: cần quyết định nhanh, tình huống khủng hoảng, cấp dưới thiếu kinh nghiệm. Nhược: giảm sáng tạo, ít cam kết từ NV." },
+      { term: "Phong cách Dân chủ (Democratic)", def: "Nhà lãnh đạo THAM KHẢO ý kiến nhóm, khuyến khích tham gia trước khi quyết định. Tăng cam kết, sự hài lòng và chất lượng quyết định. Phù hợp khi: NV có kinh nghiệm, thời gian đủ." },
+      { term: "Phong cách Tự do (Laissez-faire)", def: "Nhà lãnh đạo ĐỂ NHÓM TỰ QUYẾT ĐỊNH — ít hoặc không can thiệp. Hiệu quả chỉ khi: nhóm có chuyên môn cao, tự giác, và nhiệm vụ không cần nhiều phối hợp. VD: nhóm nghiên cứu độc lập." },
+      { term: "Nghiên cứu Michigan", def: "ĐH Michigan phát hiện 2 phong cách: (1) Employee-oriented (Định hướng Nhân viên): tập trung quan hệ con người, nhu cầu cá nhân. (2) Production-oriented (Định hướng Công việc): tập trung nhiệm vụ kỹ thuật. Kết luận: định hướng NV liên quan đến năng suất và hài lòng cao hơn." },
+      { term: "Lãnh đạo Tình huống (Situational Leadership)", def: "Hersey & Blanchard: không có một phong cách lãnh đạo nào tốt nhất cho mọi tình huống. Cần điều chỉnh phong cách phù hợp với MỨC ĐỘ SẴN SÀNG (readiness) của cấp dưới." },
+      { term: "4 Phong cách Tình huống (S1-S4)", def: "S1-Telling (Chỉ đạo): nhiều hướng dẫn, ít hỗ trợ — R1. S2-Selling (Thuyết phục): nhiều hướng dẫn VÀ hỗ trợ — R2. S3-Participating (Tham gia): ít hướng dẫn, nhiều hỗ trợ — R3. S4-Delegating (Ủy quyền): ít hướng dẫn VÀ hỗ trợ — R4." },
+      { term: "Mức độ sẵn sàng (Readiness R1-R4)", def: "R1: THIẾU năng lực + THIẾU ý chí/tự tin → S1 Telling. R2: THIẾU năng lực nhưng CÓ ý chí → S2 Selling. R3: CÓ năng lực nhưng THIẾU ý chí/tự tin → S3 Participating. R4: CÓ cả năng lực lẫn ý chí → S4 Delegating." },
+      { term: "Lãnh đạo Chuyển đổi (Transformational)", def: "Nhà lãnh đạo TRUYỀN CẢM HỨNG để cấp dưới vượt qua lợi ích cá nhân vì lợi ích tổ chức. 4 đặc trưng: Idealized Influence (ảnh hưởng lý tưởng), Inspirational Motivation, Intellectual Stimulation, Individual Consideration." },
+      { term: "Lãnh đạo Giao dịch (Transactional)", def: "Dẫn dắt bằng THỎA THUẬN: thưởng nếu đạt mục tiêu, phạt nếu không. Tập trung vào duy trì hiện trạng. Khác với Transformational: không truyền cảm hứng vượt lên trên." },
+      { term: "EQ — Emotional Intelligence", def: "Trí tuệ cảm xúc: khả năng nhận biết, hiểu và quản lý cảm xúc của bản thân và người khác. 5 thành phần: self-awareness, self-regulation, motivation, empathy, social skills. Quan trọng cho lãnh đạo hiệu quả." },
     ],
     sampleQA: [
       {
-        q: "Trình bày Lãnh đạo tình huống của Hersey & Blanchard. Cho ví dụ ứng dụng.",
-        hints: ["4 phong cách S1-S4 với đặc điểm", "4 mức độ sẵn sàng R1-R4", "Nguyên tắc: phong cách lãnh đạo phải phù hợp mức độ sẵn sàng", "Ví dụ thực tế từ công việc của bạn"]
+        q: "Trình bày Lãnh đạo Tình huống của Hersey & Blanchard. Cho ví dụ ứng dụng thực tế.",
+        hints: ["4 phong cách S1-S4 với đặc điểm cụ thể", "4 mức độ sẵn sàng R1-R4", "Nguyên tắc: phong cách phải KHỚP với mức sẵn sàng", "Ví dụ: bạn đã áp dụng phong cách nào với nhân viên nào?"]
+      },
+      {
+        q: "Phân biệt nhà lãnh đạo và nhà quản trị. Theo bạn, tổ chức cần ai hơn?",
+        hints: ["Quản trị: làm đúng cách, plan-organize-control, ổn định", "Lãnh đạo: truyền cảm hứng, thay đổi, tầm nhìn", "Tổ chức cần CẢ HAI — lý do tại sao?", "Bạn đang là nhà QTR hay nhà lãnh đạo?"]
       }
     ]
   },
@@ -195,31 +243,37 @@ const TOPICS = [
     title: "VIII. Động viên Nhân viên",
     color: "#6b1a1a",
     accent: "#e74c3c",
-    chapters: "Ch.16 Motivating Employees",
+    chapters: "Ch.16 — Motivating Employees",
     subtopics: [
-      "Khái niệm và phân loại động lực",
-      "Tháp nhu cầu Maslow (5 nấc)",
-      "Thuyết ERG (Alderfer)",
-      "Thuyết 2 nhân tố Herzberg",
-      "Thuyết kỳ vọng Vroom",
-      "Thuyết công bằng Adams",
-      "Các công cụ tạo động lực",
+      "Khái niệm và bản chất của Động lực",
+      "Tháp nhu cầu Maslow (5 cấp)",
+      "Thuyết ERG của Alderfer",
+      "Thuyết 2 Nhân tố Herzberg",
+      "Thuyết 3 Nhu cầu McClelland",
+      "Thuyết Kỳ vọng Vroom (E×I×V)",
+      "Thuyết Công bằng Adams",
     ],
     keyTerms: [
-      { term: "Tháp nhu cầu Maslow", def: "5 cấp từ thấp đến cao: (1) Sinh lý → (2) An toàn → (3) Xã hội → (4) Tôn trọng → (5) Tự hoàn thiện. Nhu cầu thấp phải được thỏa mãn trước." },
-      { term: "Thuyết ERG (Alderfer)", def: "3 nhóm nhu cầu đồng thời: Existence (tồn tại), Relatedness (quan hệ), Growth (phát triển). Linh hoạt hơn Maslow — có thể truy ngược khi nhu cầu cao bị thất vọng." },
-      { term: "Thuyết 2 nhân tố Herzberg", def: "Nhân tố vệ sinh (hygiene): lương, điều kiện làm việc — chỉ ngăn bất mãn. Nhân tố động viên: thành tích, công nhận, trách nhiệm — tạo ra sự thỏa mãn thực sự." },
-      { term: "Thuyết kỳ vọng Vroom", def: "Động lực = Kỳ vọng × Công cụ × Phần thưởng (E × I × V). Người ta nỗ lực khi tin rằng nỗ lực → kết quả → phần thưởng có giá trị." },
-      { term: "Thuyết công bằng Adams", def: "Người lao động so sánh tỷ lệ đóng góp/phần thưởng của mình với người khác. Bất công bằng → căng thẳng → hành vi điều chỉnh (giảm nỗ lực, xin thêm lương, hoặc nghỉ việc)." },
+      { term: "Động lực (Motivation)", def: "Quá trình trong đó nỗ lực của một người được KÍCH HOẠT (energized), ĐỊNH HƯỚNG (directed), và DUY TRÌ (sustained) hướng đến đạt một mục tiêu. 3 yếu tố: Cường độ (intensity), Hướng (direction), Sự kiên trì (persistence)." },
+      { term: "Tháp nhu cầu Maslow", def: "5 cấp từ thấp → cao: (1) Physiological/Sinh lý — ăn, ở, ngủ. (2) Safety/An toàn — bảo mật, ổn định. (3) Social/Xã hội — tình bạn, yêu thương. (4) Esteem/Tôn trọng — địa vị, công nhận. (5) Self-Actualization/Tự hoàn thiện — phát huy tiềm năng. Quy tắc: cấp thấp phải THỎA MÃN trước khi cấp trên xuất hiện." },
+      { term: "Nhu cầu Bậc thấp vs Bậc cao (Maslow)", def: "Lower-order needs (1,2): chủ yếu thỏa mãn bên NGOÀI — lương, điều kiện làm việc. Higher-order needs (3,4,5): thỏa mãn bên TRONG — ý nghĩa công việc, phát triển bản thân. Hàm ý: khi nhu cầu thấp đã đủ, chỉ nhu cầu cao mới tạo động lực." },
+      { term: "Thuyết ERG (Alderfer)", def: "Đơn giản hóa Maslow thành 3 nhóm: Existence (Tồn tại — vật chất), Relatedness (Quan hệ — xã hội), Growth (Phát triển — cá nhân). Điểm khác biệt: (1) Nhiều nhu cầu cùng hoạt động. (2) Frustration-Regression: nhu cầu cao không thỏa → quay về nhu cầu thấp." },
+      { term: "Thuyết 2 Nhân tố Herzberg", def: "Hygiene Factors (Nhân tố Vệ sinh): lương, giám sát, điều kiện LV, quan hệ đồng nghiệp → chỉ LOẠI BỎ BẤT MÃN, không tạo động lực thực sự. Motivators (Nhân tố Động viên): thành tích, công nhận, bản thân CV, trách nhiệm, thăng tiến → tạo SỰ HÀI LÒNG và động lực thực sự." },
+      { term: "Ứng dụng Herzberg trong thực tế", def: "Job Enrichment (Làm giàu công việc): tăng trách nhiệm, quyền tự chủ, cơ hội phát triển → kích hoạt motivators. Không chỉ cải thiện hygiene factors (tăng lương) mà cần tập trung vào NỘI DUNG công việc để tạo động lực bền vững." },
+      { term: "Thuyết 3 Nhu cầu McClelland", def: "3 nhu cầu học hỏi: (1) nAch (Achievement/Thành tích): muốn vượt trội, đạt chuẩn cao. (2) nPow (Power/Quyền lực): muốn ảnh hưởng, kiểm soát người khác. (3) nAff (Affiliation/Liên kết): muốn quan hệ thân thiết, được yêu thích. Người có nAch cao phù hợp làm doanh nhân/chuyên gia." },
+      { term: "Thuyết Kỳ vọng Vroom", def: "Motivation = E × I × V. E (Expectancy): kỳ vọng nỗ lực → kết quả tốt. I (Instrumentality): tin rằng kết quả tốt → được thưởng. V (Valence): giá trị phần thưởng với bản thân. Nếu MỘT trong ba = 0 thì động lực = 0." },
+      { term: "Thuyết Công bằng Adams", def: "So sánh: Outcomes(mình)/Inputs(mình) với Outcomes(người khác)/Inputs(người khác). Bất công xuôi (underpayment) → căng thẳng → giảm nỗ lực/xin tăng lương/nghỉ việc. Bất công ngược (overpayment) → làm việc nhiều hơn để 'bù'. Công bằng nhận thức quan trọng hơn công bằng thực tế." },
+      { term: "Goal-Setting Theory (Edwin Locke)", def: "Mục tiêu CỤ THỂ và THÁCH THỨC (nhưng khả thi) dẫn đến hiệu suất cao hơn so với mục tiêu mơ hồ hoặc dễ. Điều kiện: phải có feedback và NV phải chấp nhận mục tiêu. Cơ sở lý thuyết cho MBO và SMART." },
+      { term: "Reinforcement Theory (Skinner)", def: "Hành vi là CHỨC NĂNG của kết quả: hành vi được thưởng sẽ lặp lại, hành vi bị phạt sẽ ít lặp lại. 4 loại: Positive Reinforcement (thêm phần thưởng), Negative Reinforcement (bỏ kích thích tiêu cực), Punishment (thêm hậu quả tiêu cực), Extinction (loại bỏ phần thưởng)." },
     ],
     sampleQA: [
       {
         q: "Trình bày thuyết cấp bậc nhu cầu của Maslow. Ứng dụng thực tiễn trong quản trị nhân sự.",
-        hints: ["5 cấp bậc theo đúng thứ tự", "Nguyên tắc cấp dưới được thỏa mãn trước", "Ứng dụng: thiết kế chế độ đãi ngộ, môi trường làm việc, cơ hội phát triển", "Hạn chế của Maslow"]
+        hints: ["5 cấp bậc đúng thứ tự với ví dụ mỗi cấp", "Nguyên tắc: cấp thấp thỏa mãn trước", "Ứng dụng: lương (sinh lý/an toàn), team building (xã hội), thăng tiến (tôn trọng), giao dự án thách thức (tự hoàn thiện)", "Hạn chế: không được kiểm chứng thực nghiệm"]
       },
       {
         q: "Phân biệt nhân tố vệ sinh và nhân tố động viên của Herzberg. Ví dụ tại công ty bạn.",
-        hints: ["Nhân tố vệ sinh: chỉ ngăn bất mãn (không tạo hài lòng)", "Nhân tố động viên: tạo hài lòng thực sự", "Tên 3-4 ví dụ cụ thể mỗi loại", "Hàm ý: cần cả hai để quản lý hiệu quả"]
+        hints: ["Nhân tố vệ sinh: chỉ ngăn bất mãn, không tạo hài lòng", "Nhân tố động viên: tạo hài lòng và động lực thực sự", "Ví dụ vệ sinh: lương, phòng làm việc, chính sách công ty", "Ví dụ động viên: được ghi nhận, công việc có ý nghĩa, thăng tiến"]
       }
     ]
   },
@@ -229,24 +283,29 @@ const TOPICS = [
     title: "IX. Chức năng Kiểm soát",
     color: "#2d4a1a",
     accent: "#8bc34a",
-    chapters: "Ch.18 Monitoring and Controlling",
+    chapters: "Ch.18 — Monitoring and Controlling",
     subtopics: [
-      "Khái niệm và vai trò của kiểm soát",
-      "Quy trình kiểm soát (3 bước)",
-      "Kiểm soát phòng ngừa, tại chỗ, phản hồi",
+      "Khái niệm, tầm quan trọng của kiểm soát",
+      "Quy trình kiểm soát 3 bước",
+      "Kiểm soát Phòng ngừa, Tại chỗ, Phản hồi",
+      "Balanced Scorecard",
       "Tiêu chuẩn của hệ thống kiểm soát hiệu quả",
     ],
     keyTerms: [
-      { term: "Kiểm soát (Controlling)", def: "Giám sát hoạt động để đảm bảo thực tế phù hợp với kế hoạch. Gồm 3 bước: đặt tiêu chuẩn → đo lường → so sánh & hành động." },
-      { term: "Kiểm soát phòng ngừa (Feedforward)", def: "Kiểm soát trước khi vấn đề xảy ra. Ví dụ: kiểm tra nguyên liệu trước khi sản xuất, phỏng vấn kỹ trước khi tuyển dụng." },
-      { term: "Kiểm soát tại chỗ (Concurrent)", def: "Kiểm soát trong khi hoạt động đang diễn ra. Ví dụ: giám sát trực tiếp, hệ thống camera, kiểm tra chất lượng trên dây chuyền." },
-      { term: "Kiểm soát phản hồi (Feedback)", def: "Kiểm soát sau khi hoạt động hoàn thành. Ví dụ: báo cáo tài chính, đánh giá hiệu suất cuối năm, khảo sát khách hàng." },
-      { term: "Sai lệch chấp nhận được", def: "Khoảng dung sai cho phép giữa thực tế và tiêu chuẩn trước khi cần can thiệp. Tránh can thiệp không cần thiết khi sai lệch nhỏ." },
+      { term: "Kiểm soát (Controlling)", def: "Giám sát, so sánh và điều chỉnh hoạt động để đảm bảo đạt mục tiêu. Là chức năng cuối trong POLC nhưng KẾT NỐI với hoạch định — tiêu chuẩn kiểm soát xuất phát từ kế hoạch." },
+      { term: "Quy trình kiểm soát 3 bước", def: "(1) ĐO LƯỜNG hiệu suất thực tế: bằng quan sát trực tiếp, báo cáo thống kê, báo cáo miệng, báo cáo văn bản. (2) SO SÁNH với tiêu chuẩn: xác định khoảng sai lệch chấp nhận được. (3) HÀNH ĐỘNG điều chỉnh: sửa sai lệch hoặc xem xét lại tiêu chuẩn." },
+      { term: "Kiểm soát Phòng ngừa (Feedforward)", def: "Kiểm soát TRƯỚC khi vấn đề xảy ra. Mục tiêu: ngăn chặn thay vì sửa chữa. VD: kiểm tra nguyên liệu đầu vào, phỏng vấn kỹ trước tuyển dụng, đào tạo trước khi vào việc. Hình thức kiểm soát ĐÁNG MONG MUỐN nhất." },
+      { term: "Kiểm soát Tại chỗ (Concurrent)", def: "Kiểm soát TRONG KHI hoạt động đang diễn ra. VD: giám sát trực tiếp của quản lý, hệ thống camera, kiểm tra chất lượng trên dây chuyền sản xuất. Phát hiện và sửa lỗi NGAY LẬP TỨC." },
+      { term: "Kiểm soát Phản hồi (Feedback)", def: "Kiểm soát SAU KHI hoạt động hoàn thành. VD: báo cáo tài chính, đánh giá hiệu suất cuối năm, khảo sát sự hài lòng khách hàng. Ưu điểm: cung cấp thông tin toàn diện. Nhược: VẤN ĐỀ ĐÃ XẢY RA trước khi phát hiện." },
+      { term: "Khoảng sai lệch chấp nhận (Acceptable Range)", def: "Dải dung sai được phép giữa thực tế và tiêu chuẩn trước khi cần can thiệp. QTR chỉ hành động khi sai lệch VƯỢT ngưỡng cho phép. Tránh can thiệp không cần thiết cho mọi sai lệch nhỏ." },
+      { term: "Balanced Scorecard", def: "Hệ thống đánh giá hiệu suất từ 4 GÓC ĐỘ: (1) Tài chính (Financial), (2) Khách hàng (Customer), (3) Quy trình nội bộ (Internal Process), (4) Học hỏi & Phát triển (Learning & Growth). Cân bằng giữa chỉ số tài chính và phi tài chính." },
+      { term: "8 Tiêu chuẩn kiểm soát hiệu quả", def: "(1) Chính xác, (2) Kịp thời, (3) Kinh tế/Tiết kiệm, (4) Linh hoạt, (5) Dễ hiểu, (6) Tiêu chí hợp lý, (7) Đặt đúng vị trí trọng yếu, (8) Đề ra hành động điều chỉnh. Hệ thống kiểm soát tốt giúp phát hiện SỚM và SỬA CHỮA hiệu quả." },
+      { term: "Benchmarking", def: "So sánh quy trình, sản phẩm hoặc dịch vụ với TỔ CHỨC TỐT NHẤT trong ngành (best practices). Mục tiêu: học hỏi và cải tiến liên tục. VD: Xerox benchmark với L.L. Bean để cải thiện logistics." },
     ],
     sampleQA: [
       {
         q: "Trình bày 3 hình thức kiểm soát. Ứng dụng nào phù hợp nhất tại tổ chức bạn?",
-        hints: ["Phòng ngừa: trước khi xảy ra", "Tại chỗ: trong khi diễn ra", "Phản hồi: sau khi hoàn thành", "Ưu nhược điểm từng loại", "Liên hệ thực tế tại công ty"]
+        hints: ["Phòng ngừa: trước khi xảy ra — tốt nhất nhưng khó nhất", "Tại chỗ: trong khi diễn ra — phát hiện ngay", "Phản hồi: sau khi xong — phổ biến nhất", "Nêu ví dụ cụ thể từng loại tại tổ chức bạn"]
       }
     ]
   },
@@ -255,13 +314,138 @@ const TOPICS = [
 const INTERVIEW_QUESTIONS = [
   "Tại sao Anh/Chị mong muốn học khóa EMBA này? Mục tiêu nghề nghiệp của Anh/Chị trong 5 năm tới là gì?",
   "Theo Anh/Chị, sự khác biệt giữa chương trình EMBA của Đại học Ngoại thương và MBA thông thường là gì?",
-  "Anh/Chị có phải là người ham học hỏi không? Hãy chứng minh bằng ví dụ cụ thể.",
-  "Anh/Chị đã đọc cuốn sách hoặc bài báo nào về quản trị/kinh doanh trong 4 tuần gần đây?",
+  "Anh/Chị có phải là người ham học hỏi không? Hãy chứng minh bằng ví dụ cụ thể gần đây.",
+  "Anh/Chị đã đọc cuốn sách hoặc bài báo nào về quản trị/kinh doanh trong 4 tuần gần đây? Nội dung chính là gì?",
   "Anh/Chị đã bao giờ mất tự tin trước một vấn đề quan trọng chưa? Anh/Chị đã vượt qua như thế nào?",
   "Hãy kể về một quyết định khó khăn nhất trong sự nghiệp quản lý của Anh/Chị. Anh/Chị đã xử lý ra sao?",
   "Nếu được nhận vào chương trình EMBA, Anh/Chị sẽ đóng góp gì cho cộng đồng học viên?",
+  "Anh/Chị đã từng lãnh đạo một sự thay đổi lớn trong tổ chức chưa? Hãy mô tả quá trình đó.",
+  "Theo Anh/Chị, năng lực quan trọng nhất của một nhà lãnh đạo trong môi trường kinh doanh hiện đại là gì?",
 ];
 
+// QUIZ DATA — 20 câu hỏi toàn diện
+const QUIZ_QUESTIONS = [
+  {
+    q: "Theo Robbins & Coulter, 'Efficiency' (Hiệu quả) trong quản trị có nghĩa là:",
+    options: ["Hoàn thành đúng mục tiêu đã đặt ra", "Sử dụng tối ưu nguồn lực để đạt kết quả — 'doing things right'", "Ra quyết định đúng và kịp thời", "Phối hợp tốt giữa các bộ phận"],
+    correct: 1,
+    explain: "Efficiency = 'Doing things right' — tối thiểu hóa lãng phí nguồn lực (người, tiền, thiết bị). Phân biệt với Effectiveness = 'Doing the right things' — hoàn thành đúng mục tiêu. Cả hai đều cần thiết cho quản trị tốt."
+  },
+  {
+    q: "Theo Taylor, nguyên tắc ĐẦU TIÊN trong Quản trị Khoa học là:",
+    options: ["Tuyển chọn và đào tạo nhân viên một cách khoa học", "Phân chia công việc bình đẳng giữa QTR và công nhân", "Nghiên cứu khoa học từng yếu tố công việc để tìm 'one best way'", "Hợp tác chân thành với công nhân"],
+    correct: 2,
+    explain: "Nguyên tắc 1 của Taylor: phát triển khoa học cho từng yếu tố công việc (time-and-motion studies) để thay thế phương pháp kinh nghiệm 'rule-of-thumb'. Đây là nền tảng để xây dựng 3 nguyên tắc còn lại."
+  },
+  {
+    q: "Hiệu ứng Hawthorne (Hawthorne Effect) phát hiện điều gì quan trọng?",
+    options: ["Điều kiện ánh sáng tốt hơn luôn tăng năng suất", "Lương cao là yếu tố duy nhất tạo động lực", "Năng suất tăng khi NLĐ biết mình đang được quan sát — yếu tố xã hội quan trọng", "Làm việc nhóm luôn hiệu quả hơn cá nhân"],
+    correct: 2,
+    explain: "Nghiên cứu tại Western Electric (Hawthorne Plant, 1920s) của Elton Mayo: năng suất tăng bất kể điều kiện vật chất thay đổi như thế nào, vì NLĐ được chú ý và quan tâm. Đây là nền tảng của Behavioral Approach."
+  },
+  {
+    q: "Theo Fayol, nguyên tắc 'Unity of Command' (Thống nhất chỉ huy) có nghĩa là:",
+    options: ["Tất cả quyết định phải tập trung ở cấp cao nhất", "Mỗi nhân viên chỉ nhận lệnh từ một cấp trên duy nhất", "Toàn tổ chức phải có chung một mục tiêu", "Nhà quản trị phải ra lệnh nhất quán"],
+    correct: 1,
+    explain: "Unity of Command là một trong 14 nguyên tắc của Fayol: mỗi NV chỉ có MỘT người cấp trên trực tiếp. Tránh nhầm lẫn, xung đột mệnh lệnh. Đây là lý do cơ cấu ma trận có thể gây vấn đề."
+  },
+  {
+    q: "Nhân tố nào sau đây là 'Nhân tố Động viên' (Motivator) theo thuyết 2 nhân tố của Herzberg?",
+    options: ["Mức lương và phúc lợi", "Điều kiện và môi trường làm việc", "Sự công nhận thành tích và trách nhiệm công việc", "Quan hệ với đồng nghiệp và cấp trên"],
+    correct: 2,
+    explain: "Motivators của Herzberg (tạo hài lòng thực sự): Thành tích, Công nhận, Bản thân công việc, Trách nhiệm, Thăng tiến, Phát triển. Lương, điều kiện LV, quan hệ là Hygiene Factors — chỉ ngăn bất mãn, không tạo động lực."
+  },
+  {
+    q: "Trong Lãnh đạo Tình huống Hersey & Blanchard, phong cách S2 'Selling' phù hợp với:",
+    options: ["R1: Thiếu cả năng lực và ý chí", "R2: Thiếu năng lực nhưng nhiệt tình, có ý chí", "R3: Có năng lực nhưng thiếu tự tin/ý chí", "R4: Có đủ cả năng lực và ý chí"],
+    correct: 1,
+    explain: "S2 Selling: lãnh đạo vừa HƯỚNG DẪN nhiều (vì NV thiếu kỹ năng) vừa HỖ TRỢ nhiều (vì NV nhiệt tình cần được giải thích lý do). Phù hợp R2: năng lực thấp nhưng động lực cao — nhân viên mới hăng hái."
+  },
+  {
+    q: "Mô hình 5 lực lượng cạnh tranh của Porter KHÔNG bao gồm yếu tố nào?",
+    options: ["Nguy cơ từ sản phẩm thay thế", "Ảnh hưởng của chính phủ và luật pháp", "Quyền thương lượng của nhà cung cấp", "Nguy cơ từ đối thủ mới gia nhập ngành"],
+    correct: 1,
+    explain: "5 Forces Porter: Rivalry (cạnh tranh hiện tại), New Entrants (đối thủ mới), Suppliers (NCC), Buyers (KH), Substitutes (thay thế). Chính phủ thuộc môi trường PESTEL/vĩ mô — không nằm trong mô hình Porter."
+  },
+  {
+    q: "Thuyết ERG của Alderfer khác với tháp Maslow ở điểm quan trọng nào?",
+    options: ["ERG có 5 cấp thay vì 3 cấp", "ERG cho phép nhiều nhu cầu hoạt động cùng lúc và có regression", "ERG tập trung vào nhu cầu tài chính hơn", "ERG chỉ áp dụng cho quản lý cấp cao"],
+    correct: 1,
+    explain: "2 điểm khác biệt chính: (1) Đồng thời: nhiều nhu cầu có thể hoạt động cùng lúc (Maslow: tuần tự). (2) Frustration-Regression: nếu nhu cầu cao bị cản trở → quay về nhu cầu thấp hơn. Linh hoạt hơn Maslow trong thực tế."
+  },
+  {
+    q: "Theo thuyết Kỳ vọng của Vroom (E×I×V), nếu nhân viên không tin rằng nỗ lực sẽ dẫn đến kết quả tốt, thì:",
+    options: ["Động lực = V (chỉ phụ thuộc vào giá trị phần thưởng)", "Động lực = 0 vì E = 0", "Động lực giảm nhưng vẫn tồn tại", "Động lực phụ thuộc vào I và V"],
+    correct: 1,
+    explain: "Vroom: Motivation = E × I × V. Nếu E (Expectancy) = 0 (không tin nỗ lực → kết quả), thì tích số = 0 bất kể I và V cao đến đâu. Đây là lý do QTR cần đảm bảo NV thấy mối liên hệ rõ ràng giữa nỗ lực và kết quả."
+  },
+  {
+    q: "Cơ cấu tổ chức nào có đặc điểm: linh hoạt, phi tập trung, ít quy tắc, phù hợp môi trường biến động?",
+    options: ["Cơ cấu Cơ khí (Mechanistic)", "Cơ cấu Hữu cơ (Organic)", "Cơ cấu Chức năng (Functional)", "Cơ cấu Sản phẩm (Product)"],
+    correct: 1,
+    explain: "Organic structure: linh hoạt, phi tập trung, ít chính thức hóa, truyền thông đa chiều, phạm vi kiểm soát rộng. Ngược với Mechanistic (chính thức cao, tập trung, ổn định). Phù hợp môi trường bất định và cần sáng tạo."
+  },
+  {
+    q: "Kỹ năng quản trị nào QUAN TRỌNG NHẤT ở cấp quản trị cơ sở (First-line managers)?",
+    options: ["Kỹ năng tư duy khái quát (Conceptual)", "Kỹ năng nhân sự (Human)", "Kỹ năng chuyên môn (Technical)", "Kỹ năng lãnh đạo (Leadership)"],
+    correct: 2,
+    explain: "Theo Katz: First-line managers cần Technical skills nhiều nhất vì họ giám sát trực tiếp việc thực hiện. Middle: cân bằng 3 kỹ năng. Top: Conceptual skills quan trọng nhất (tư duy chiến lược, nhìn toàn cảnh). Human skills quan trọng ở MỌI cấp."
+  },
+  {
+    q: "Nguyên tắc SMART yêu cầu mục tiêu phải 'Measurable'. Điều này có nghĩa là:",
+    options: ["Mục tiêu phải được đo bằng tiền", "Mục tiêu phải có chỉ số cụ thể để biết khi nào đạt được", "Mục tiêu phải được đo hàng ngày", "Mục tiêu phải dễ đo lường với công cụ đơn giản"],
+    correct: 1,
+    explain: "Measurable: mục tiêu cần có CHỈ SỐ ĐO LƯỜNG cụ thể — không phải chỉ 'tăng doanh thu' mà phải là 'tăng doanh thu 20%'. Không đo được → không biết có đạt hay không → không kiểm soát được tiến độ."
+  },
+  {
+    q: "Trong phân tích SWOT, 'Opportunities' (Cơ hội) là gì?",
+    options: ["Điểm mạnh nội bộ của tổ chức", "Điểm yếu cần cải thiện trong tổ chức", "Các yếu tố thuận lợi từ môi trường bên ngoài", "Các mối đe dọa tiềm ẩn từ đối thủ"],
+    correct: 2,
+    explain: "SWOT: S-W là NỘI BỘ (strengths & weaknesses). O-T là BÊN NGOÀI (opportunities & threats từ môi trường). Opportunities: xu hướng thị trường, thay đổi công nghệ, quy định mới có lợi → tổ chức có thể khai thác để phát triển."
+  },
+  {
+    q: "Kiểm soát Phòng ngừa (Feedforward Control) khác với Kiểm soát Phản hồi (Feedback Control) ở:",
+    options: ["Feedforward diễn ra trong khi hoạt động đang thực hiện", "Feedforward diễn ra TRƯỚC khi vấn đề xảy ra để ngăn chặn", "Feedforward chỉ áp dụng cho tài chính", "Feedforward dựa trên kết quả cuối kỳ"],
+    correct: 1,
+    explain: "Feedforward (Phòng ngừa): TRƯỚC khi bắt đầu — kiểm tra đầu vào, phỏng vấn kỹ. Concurrent (Tại chỗ): TRONG KHI thực hiện. Feedback (Phản hồi): SAU KHI hoàn thành. Feedforward là tốt nhất nhưng khó nhất vì cần dự đoán vấn đề."
+  },
+  {
+    q: "Thuyết Công bằng Adams (Equity Theory) dự đoán rằng nhân viên cảm thấy bị trả lương THẤP hơn so với đóng góp sẽ:",
+    options: ["Làm việc chăm chỉ hơn để xứng đáng với mức lương", "Giảm nỗ lực, xin tăng lương, hoặc nghỉ việc để khôi phục công bằng", "Chấp nhận và tiếp tục làm việc bình thường", "Thay đổi cách so sánh — không so sánh với người khác nữa"],
+    correct: 1,
+    explain: "Khi Outcomes/Inputs của mình < Outcomes/Inputs của người tham chiếu → cảm giác bất công (underpayment). NV sẽ hành động để khôi phục công bằng: giảm nỗ lực, tăng outcomes (xin thêm lương), thay đổi người so sánh, hoặc rời tổ chức."
+  },
+  {
+    q: "Cơ cấu tổ chức Ma trận (Matrix Structure) có đặc điểm nổi bật nào?",
+    options: ["Mỗi nhân viên chỉ có duy nhất một cấp trên trực tiếp", "Nhân viên báo cáo cho cả trưởng bộ phận chức năng VÀ trưởng dự án", "Toàn bộ quyết định tập trung ở CEO", "Phân chia theo vùng địa lý"],
+    correct: 1,
+    explain: "Ma trận: kết hợp chức năng + dự án. NV có 2 cấp trên → vi phạm Unity of Command của Fayol. Ưu: linh hoạt, phối hợp tốt, dùng chuyên gia hiệu quả. Nhược: xung đột quyền lực, mơ hồ trách nhiệm, căng thẳng cho NV."
+  },
+  {
+    q: "MBO (Management by Objectives) hiệu quả vì:",
+    options: ["QTR đơn phương đặt mục tiêu cho NV một cách rõ ràng", "QTR và NV CÙNG xác định mục tiêu, tăng cam kết và rõ ràng về kỳ vọng", "Mục tiêu được đặt thật thách thức để tạo áp lực", "Loại bỏ hoàn toàn nhu cầu giám sát"],
+    correct: 1,
+    explain: "MBO hiệu quả nhờ SỰ THAM GIA: QTR-NV cùng xác định mục tiêu SMART → NV cam kết hơn (vì tự đặt ra), rõ ràng về mong đợi, nhận phản hồi định kỳ, và được thưởng dựa trên kết quả thực tế. Cơ sở lý thuyết: Goal-Setting Theory."
+  },
+  {
+    q: "Theo nghiên cứu của Đại học Michigan về phong cách lãnh đạo, phong cách nào liên quan đến năng suất và sự hài lòng cao hơn?",
+    options: ["Production-oriented (Định hướng Công việc)", "Employee-oriented (Định hướng Nhân viên)", "Autocratic (Độc đoán)", "Laissez-faire (Tự do)"],
+    correct: 1,
+    explain: "Nghiên cứu Michigan phát hiện: Employee-oriented leaders (tập trung quan hệ con người, nhu cầu cá nhân, chấp nhận khác biệt) liên quan đến năng suất nhóm CAO HƠN và sự hài lòng cao hơn so với production-oriented leaders."
+  },
+  {
+    q: "Tiếp cận Tình huống (Contingency Approach) trong quản trị cho rằng:",
+    options: ["Có một phương pháp quản trị tốt nhất áp dụng cho mọi tổ chức", "Không có phương pháp nào phổ quát — QTR cần điều chỉnh theo từng bối cảnh", "Quản trị khoa học của Taylor là tốt nhất trong mọi trường hợp", "Công nghệ là yếu tố duy nhất quyết định phương pháp quản trị"],
+    correct: 1,
+    explain: "Contingency Approach: 'It depends' — không có one-best-way. Phương pháp tốt phụ thuộc vào: quy mô tổ chức, mức độ bất định môi trường, chiến lược, công nghệ, và đặc điểm con người. QTR cần linh hoạt và chẩn đoán đúng tình huống."
+  },
+  {
+    q: "Balanced Scorecard đánh giá hiệu suất tổ chức từ mấy góc độ?",
+    options: ["2 góc độ: tài chính và phi tài chính", "3 góc độ: tài chính, khách hàng, và quy trình", "4 góc độ: Tài chính, Khách hàng, Quy trình nội bộ, Học hỏi & Phát triển", "5 góc độ theo mô hình Porter"],
+    correct: 2,
+    explain: "Balanced Scorecard (Kaplan & Norton): đánh giá từ 4 góc độ: (1) Financial — lợi nhuận, ROI. (2) Customer — hài lòng KH, thị phần. (3) Internal Process — chất lượng, thời gian. (4) Learning & Growth — năng lực NV, đổi mới. Cân bằng giữa kết quả ngắn hạn và dài hạn."
+  },
+];
 // ─── STYLES ──────────────────────────────────────────────────────────────────
 
 const styles = `
@@ -565,71 +749,6 @@ const styles = `
 
 // ─── QUIZ DATA ────────────────────────────────────────────────────────────────
 
-const QUIZ_QUESTIONS = [
-  {
-    q: "Theo Taylor, nguyên tắc đầu tiên trong Quản trị Khoa học là gì?",
-    options: ["Tuyển chọn và đào tạo nhân viên một cách khoa học", "Phát triển quy trình làm việc khoa học cho từng yếu tố công việc", "Hợp tác chân thành với công nhân", "Phân chia công việc bình đẳng"],
-    correct: 1,
-    explain: "Taylor bắt đầu bằng việc nghiên cứu khoa học từng yếu tố công việc (ví dụ: time & motion studies) trước khi tuyển chọn hay đào tạo nhân viên."
-  },
-  {
-    q: "Nhân tố nào sau đây là 'nhân tố động viên' theo thuyết 2 nhân tố của Herzberg?",
-    options: ["Mức lương và phúc lợi", "Điều kiện làm việc", "Sự công nhận thành tích", "Mối quan hệ với đồng nghiệp"],
-    correct: 2,
-    explain: "Nhân tố động viên (motivators) của Herzberg tạo ra sự thỏa mãn thực sự: thành tích, công nhận, bản thân công việc, trách nhiệm, thăng tiến. Lương và điều kiện làm việc là nhân tố vệ sinh (hygiene)."
-  },
-  {
-    q: "Trong Lãnh đạo Tình huống (Hersey & Blanchard), phong cách S2 'Selling' phù hợp với nhân viên ở mức độ sẵn sàng nào?",
-    options: ["R1: Không có năng lực, không có động lực", "R2: Không có năng lực nhưng có động lực", "R3: Có năng lực nhưng thiếu động lực", "R4: Có năng lực và có động lực"],
-    correct: 1,
-    explain: "S2 Selling (hướng dẫn + động viên) dành cho R2: nhân viên chưa có kỹ năng đủ nhưng nhiệt tình. Lãnh đạo cần giải thích và thuyết phục."
-  },
-  {
-    q: "Mô hình 5 lực lượng cạnh tranh của Porter KHÔNG bao gồm yếu tố nào?",
-    options: ["Nguy cơ từ sản phẩm thay thế", "Quyền thương lượng của chính phủ", "Quyền thương lượng của nhà cung cấp", "Nguy cơ từ đối thủ mới gia nhập ngành"],
-    correct: 1,
-    explain: "5 lực lượng Porter: (1) Đối thủ hiện tại, (2) Đối thủ tiềm năng mới, (3) NCC, (4) Khách hàng, (5) Sản phẩm thay thế. Chính phủ thuộc môi trường vĩ mô (PEST), không nằm trong mô hình Porter."
-  },
-  {
-    q: "Theo McGregor, nhà quản trị tin vào Thuyết Y sẽ:",
-    options: ["Giám sát chặt chẽ và dùng hình phạt để kỷ luật nhân viên", "Trao quyền, phân cấp và tạo môi trường để nhân viên tự phát triển", "Xây dựng hệ thống quy tắc nghiêm ngặt cho mọi hoạt động", "Chỉ thưởng vật chất để tăng năng suất"],
-    correct: 1,
-    explain: "Thuyết Y giả định người lao động tự giác, muốn có trách nhiệm và sáng tạo. Vì vậy, nhà quản trị theo Thuyết Y sẽ trao quyền và tạo môi trường làm việc tốt thay vì kiểm soát chặt chẽ."
-  },
-  {
-    q: "Nguyên tắc SMART yêu cầu mục tiêu phải 'Time-bound'. Điều này có nghĩa là:",
-    options: ["Mục tiêu phải được đặt trong thời gian ngắn nhất có thể", "Mục tiêu phải có thời hạn hoàn thành cụ thể", "Mục tiêu phải được đo lường hàng ngày", "Mục tiêu phải liên quan đến thời gian làm việc của nhân viên"],
-    correct: 1,
-    explain: "Time-bound có nghĩa là mục tiêu cần có deadline rõ ràng — ví dụ 'tăng doanh thu 15% trong Q2/2026'. Không có thời hạn, mục tiêu chỉ là mong muốn, không có tính cam kết."
-  },
-  {
-    q: "Cơ cấu tổ chức nào được mô tả là 'hữu cơ' (organic)?",
-    options: ["Nhiều tầng quản trị, quy tắc chặt chẽ, tập trung hóa cao", "Linh hoạt, phi tập trung, ít quy tắc, phù hợp môi trường biến động", "Phân chia rõ ràng theo chức năng chuyên môn", "Mỗi nhân viên báo cáo cho hai cấp quản lý khác nhau"],
-    correct: 1,
-    explain: "Cơ cấu hữu cơ (organic): linh hoạt, phi tập trung, ít quy tắc, phạm vi kiểm soát rộng — phù hợp môi trường không chắc chắn và cần sáng tạo. Đối lập với cơ cấu cơ khí (mechanistic)."
-  },
-  {
-    q: "Theo thuyết Kỳ vọng của Vroom, động lực = E × I × V. Chữ 'I' (Instrumentality) có nghĩa là gì?",
-    options: ["Mức độ quan trọng của phần thưởng", "Niềm tin rằng nỗ lực sẽ dẫn đến kết quả tốt", "Niềm tin rằng kết quả tốt sẽ dẫn đến phần thưởng", "Công cụ đo lường hiệu suất"],
-    correct: 2,
-    explain: "I (Instrumentality) = Công cụ tính: niềm tin rằng đạt kết quả tốt sẽ được thưởng. E (Expectancy) = kỳ vọng nỗ lực → kết quả. V (Valence) = giá trị phần thưởng với cá nhân."
-  },
-  {
-    q: "Kiểm soát phòng ngừa (Feedforward control) khác với kiểm soát phản hồi (Feedback control) ở điểm nào?",
-    options: ["Kiểm soát phòng ngừa diễn ra trong khi hoạt động đang thực hiện", "Kiểm soát phòng ngừa diễn ra trước khi vấn đề xảy ra", "Kiểm soát phòng ngừa chỉ áp dụng cho bộ phận tài chính", "Kiểm soát phòng ngừa dựa trên kết quả cuối kỳ"],
-    correct: 1,
-    explain: "Feedforward: trước khi vấn đề xảy ra (kiểm tra nguyên liệu, phỏng vấn kỹ). Concurrent: trong khi thực hiện. Feedback: sau khi hoàn thành (báo cáo kết quả, đánh giá hiệu suất)."
-  },
-  {
-    q: "Hiệu ứng Hawthorne (Hawthorne Effect) kết luận rằng:",
-    options: ["Điều kiện ánh sáng tốt hơn luôn tăng năng suất", "Nhân viên làm việc tốt hơn khi biết mình đang được quan sát", "Tiền lương là yếu tố duy nhất ảnh hưởng đến năng suất", "Làm việc nhóm luôn hiệu quả hơn làm việc cá nhân"],
-    correct: 1,
-    explain: "Nghiên cứu Hawthorne tại Western Electric (1920s) phát hiện rằng bất kể điều kiện vật chất thay đổi thế nào, năng suất đều tăng khi nhân viên biết mình đang được chú ý/quan sát."
-  },
-];
-
-// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
-
 export default function EMBAStudyTool() {
   const [screen, setScreen] = useState("home"); // home | topics | study | interview | quiz
   const [selectedTopic, setSelectedTopic] = useState(null);
@@ -782,9 +901,9 @@ Hãy đánh giá chi tiết câu trả lời này.`;
 
           <div className="mode-cards">
             {[
-              { icon: "🃏", title: "Flashcard Thuật ngữ", desc: "Ôn tập nhanh các khái niệm và định nghĩa trọng tâm từng chủ đề. Lý tưởng cho việc ghi nhớ.", tag: "8 chủ đề · 50+ thuật ngữ", screen: "topics", accent: "#c9a84c" },
+              { icon: "🃏", title: "Flashcard Thuật ngữ", desc: "Ôn tập nhanh các khái niệm và định nghĩa trọng tâm từng chủ đề. Lý tưởng cho việc ghi nhớ.", tag: "8 chủ đề · 80+ thuật ngữ", screen: "topics", accent: "#c9a84c" },
               { icon: "🤖", title: "Phỏng vấn AI", desc: "Claude AI đóng vai Hội đồng tuyển sinh, hỏi và chấm điểm câu trả lời của bạn theo chuẩn EMBA.", tag: "AI-powered · Phản hồi chi tiết", screen: "interview", accent: "#3498db" },
-              { icon: "📝", title: "Trắc nghiệm Kiến thức", desc: "10 câu hỏi trắc nghiệm về các lý thuyết quản trị trọng tâm. Có giải thích đáp án chi tiết.", tag: "10 câu · Có giải thích", screen: "quiz", accent: "#e91e8c" },
+              { icon: "📝", title: "Trắc nghiệm Kiến thức", desc: "20 câu trắc nghiệm bám sát nội dung Robbins & Coulter. Câu hỏi xáo ngẫu nhiên mỗi lần thi.", tag: "20 câu · Có giải thích", screen: "quiz", accent: "#e91e8c" },
             ].map(m => (
               <div
                 key={m.screen}

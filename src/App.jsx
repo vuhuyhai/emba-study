@@ -1100,6 +1100,16 @@ Hãy đánh giá chi tiết câu trả lời này.`;
           )}
         </div>
       )}
+
+      {/* FOOTER */}
+      <div style={{
+        textAlign: "center", padding: "24px 16px",
+        borderTop: "1px solid var(--border)", marginTop: 16,
+        fontSize: 12, color: "var(--muted)", fontWeight: 400,
+        letterSpacing: "0.2px"
+      }}>
+        App được phát triển bởi <strong style={{ color: "var(--text)", fontWeight: 500 }}>Vũ Hải</strong> | Business Consultant
+      </div>
     </div>
   );
 }
